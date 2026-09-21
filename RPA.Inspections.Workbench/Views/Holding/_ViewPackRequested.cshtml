@@ -1,0 +1,23 @@
+﻿@model RPA.Inspections.Workbench.Models.PackRequested
+
+
+
+@if (Model != null)
+{
+    @Html.Hidden("pRequested", true)
+        <td style="padding-left:100px">
+            Pack Requested :
+        </td>
+    <td>
+        <font color="red">
+        @Html.DisplayFor(model => model.datePackRequested) <font color="black">
+    by</font>
+    @Html.DisplayFor(model => model.requestedBy)
+</font>
+    </td>
+    
+ }
+else
+{
+    @Html.Hidden("pRequested", false)
+}

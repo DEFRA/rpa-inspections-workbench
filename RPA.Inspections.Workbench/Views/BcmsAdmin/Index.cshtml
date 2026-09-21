@@ -1,0 +1,166 @@
+﻿@model  List<RPA.Inspections.Workbench.Models.BcmsRequested>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+
+
+<h2>BCMS Admin Area</h2>
+<br />
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+@using (Html.BeginForm("BulkRequest", "BcmsAdmin"))
+{
+    @Html.AntiForgeryToken()
+    <table>
+        <tr style="font-size:18px">
+            <td>
+                @Html.Label("Start Date")
+            </td>
+            <td>
+                <input type="text" name="startDate" id="startDate" style="margin-bottom:10px; width:220px; font-size:18px" readonly="readonly" />
+            </td>
+        </tr>
+
+        <tr style="font-size:18px">
+            <td>
+                @Html.Label("End Date")
+            </td>
+            <td>
+                <input type="text" name="endDate" id="endDate" style="margin-bottom:10px; width:220px; font-size:18px" readonly="readonly" />
+            </td>
+        </tr>
+    </table>
+
+    <input type="submit" value="Bulk Request" />
+}
+@using (Html.BeginForm("SpecificRequest", "BcmsAdmin"))
+{
+    @Html.AntiForgeryToken()
+
+    <table>
+        <tr style="font-size:18px">
+            <td>
+                @Html.Label("CPH Number")
+            </td>
+            <td>
+                <input type="text" name="cph" id="cph" style="margin-bottom:18px" />
+            </td>
+        </tr>
+        <tr style="font-size:18px">
+            <td>
+                @Html.Label("Scheme Year")
+            </td>
+            <td>
+                <input type="text" name="schemeYear" id="schemeYear" style="margin-bottom:18px" />
+            </td>
+        </tr>
+    </table>
+
+    <input type="submit" value="Specific Request" />
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div style="font-size:x-large">
+        @Html.Label("Recent Requests")
+    </div>
+
+    <table>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].CphNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].SchemeYear)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].ActiveRequest)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].DatePackRequested)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].BulkRequest)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].BcmsGenerated)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Filepath)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Error)
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.CphNumber)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.SchemeYear)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.ActiveRequest)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.DatePackRequested)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.BulkRequest)
+                </td>
+                <td align="center">
+                    @Html.DisplayFor(modelItem => item.BcmsGenerated)
+                </td>
+                <td align="center">
+
+                    @if (item.Filepath != null)
+                    {
+                        @Html.ActionLink("Open Report", "open_report", new { name = item.Filepath })
+                    }
+
+                </td>
+                <td align="center" style="color:red">
+                    @Html.DisplayFor(modelItem => item.Error)
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+    <script>
+        $(function () {
+            $("#startDate").datepicker({
+                dateFormat: 'dd/mm/yy',
+                showAnim: 'slideDown'
+            });
+        })
+        $(function () {
+            $("#endDate").datepicker({
+                dateFormat: 'dd/mm/yy',
+                showAnim: 'slideDown'
+            });
+        })
+    </script>

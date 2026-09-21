@@ -1,0 +1,101 @@
+﻿
+@model PagedList<RPA.Inspections.Workbench.Models.Holding>
+
+@{
+    ViewBag.Title = "Index";    
+}
+
+@using PagedList.Mvc;
+@using PagedList;
+
+<div class="float-right">
+    <section id="login">
+        Hello, <span class="username">@ViewBag.LoggedInUser</span>
+    </section>
+    </div>
+    <h2>Search Holdings</h2>
+    <h5>Enter CPH Number</h5>
+    <h5 style="color:red">@TempData["InvalidCPH"]</h5>
+
+
+    @using (Html.BeginForm())
+    {
+        <div class="float-left">
+            <input type="text" name="searchString" id="searchString" />
+        </div>
+        <div class="float-left" style="margin-left:10px">
+            <button class="button" style="position:static;" id="searchButton">Search</button>
+        </div>
+
+    }
+
+    <div class="float-left">
+        <button style="position:static;" onclick="location.href='@Url.Action("Index", new { searchString = string.Empty })'">Clear</button>
+    </div>
+
+    <div class="float-right">
+        <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+    </div>
+    <br />
+
+
+    @if (Model.Count == 0)
+    {
+        <br />
+        <h3 style="text-align:center">No Holdings Assigned</h3>
+    }
+
+    @if (Model.Count != 0)
+    {
+        <br />
+        <h3 style="text-align:center">Assigned Holdings</h3>
+        <table class="table">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].cphNumber)
+                </th>
+
+                <th>
+                    @Html.DisplayNameFor(model => model[0].primaryName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model[0].region)
+                </th>
+                <th>
+                    View Details
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr id=@item.holdingId>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.cphNumber)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.primaryName)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.region)
+                    </td>
+                    <td align="center">
+                        <button onclick="location.href='@Url.Action("ViewHolding", "Holding", new { HoldingId = item.holdingId })'">View Holding</button>
+                    </td>
+
+
+                    <td>@Html.HiddenFor(modelItem => item.holdingId)</td>
+                </tr>
+            }
+        </table>
+
+
+
+
+        <div class="float-left clear-left">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+            Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Holdings
+        </div>
+
+    }
+    <br />
+    <br />

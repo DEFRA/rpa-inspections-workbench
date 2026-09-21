@@ -1,0 +1,80 @@
+﻿@model List<RPA.Inspections.Workbench.Models.LinkedHolding>
+
+
+
+@if (Model.Count != 0)
+{
+    @Html.Raw("Linked or Sub Holdings : &nbsp")
+
+    for (int i = 0; i < Model.Count; i++)
+    {
+
+
+
+        <button id=@(i + "openb") data-id="@Model[i].linkedHoldingId">@Html.DisplayFor(model => Model[i].CPHNumberLH)</button>
+        
+        @Html.Hidden(i.ToString(),i, new { @id = i})
+
+        
+
+        @Html.Raw("&nbsp &nbsp")
+
+        <div id= @(i + "dialog") style="display:none">
+          
+            @if (Model[i].isLink == true)
+            {
+                <h5>Linked Holding</h5>
+            }
+            else
+            {
+                <h5>Sub Location</h5>
+            }
+
+            <div>@Html.DisplayFor(model => Model[i].CPHNumberLH)</div>
+            <div>@Html.DisplayFor(model => Model[i].primaryNameLH)</div>
+            <div>@Html.DisplayFor(model => Model[i].secondaryNameLH)</div>
+            <div>@Html.DisplayFor(model => Model[i].addressLine1LH)</div>
+            <div>@Html.DisplayFor(model => Model[i].addressLine2LH)</div>
+            <div>@Html.DisplayFor(model => Model[i].addressLine3LH)</div>
+            <div>@Html.DisplayFor(model => Model[i].PostCodeLH)</div>
+            <div>@Html.DisplayFor(model => Model[i].regionLH)</div>
+            
+
+            
+        </div>
+
+        
+
+    <script type="text/javascript">
+
+     $('#' + @i + "dialog").dialog({
+        autoOpen: false,
+        width: "auto",
+        height: "auto",
+        title: "Holding Details",
+        modal: true,
+        closeText: null,
+        draggable: true,
+        
+        beforeClose: function (event, ui) {
+           
+        },
+    });
+
+    
+        $('#' +@i + "openb").click(function () {
+            $('#' + @i + "dialog").dialog("open");
+
+        
+    });
+
+    </script>
+
+    }
+
+
+}
+
+
+
+

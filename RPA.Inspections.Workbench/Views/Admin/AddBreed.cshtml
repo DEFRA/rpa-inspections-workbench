@@ -1,0 +1,39 @@
+﻿@model RPA.Inspections.Workbench.Models.Breed
+
+
+@{
+    ViewBag.Title = "AddBreed";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Action("BreedList", "Admin")'">Back</button>
+</div>
+
+<h2>Add Breed</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <table>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.breedCode) </td>
+            <td>@Html.TextBoxFor(model => model.breedCode) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.breedFull) </td>
+            <td>@Html.TextBoxFor(model => model.breedFull) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Active) </td>
+            <td>@Html.CheckBoxFor(model => model.Active) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+    </table>
+
+    <button style="position:static;">Save</button>
+}

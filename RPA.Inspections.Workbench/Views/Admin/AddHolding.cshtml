@@ -1,0 +1,126 @@
+﻿@model RPA.Inspections.Workbench.Models.Holding
+
+
+@{
+    ViewBag.Title = "AddHolding";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Action("HoldingList", "Admin")'">Back</button>
+</div>
+
+<h2>Add Holding</h2>
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <table>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.cphNumber) </td>
+            <td>@Html.TextBoxFor(model => model.cphNumber) 
+            @Html.ValidationMessageFor(model => model.cphNumber)</td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.SBI) </td>
+            <td>@Html.TextBoxFor(model => model.SBI)
+            @Html.ValidationMessageFor(model => model.SBI) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+     
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.SchemeNameDrop.Text) </td>
+            <td>
+                @Html.DropDownList("SchemeNameDropId", null, "", htmlAttributes: new { @style = "width:220px;" })
+                @Html.ValidationMessageFor(model => model.SchemeNameDropId)
+            </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        
+
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.selectionMethod) </td>
+            <td>@Html.DropDownListFor(model => model.selectionMethod, new List<SelectListItem> { new SelectListItem { Text = "", Value = null }, new SelectListItem { Text = "Risk", Value = "Risk" }, new SelectListItem { Text = "Random", Value = "Random" }, new SelectListItem { Text = "Targeted", Value = "Targeted" }, new SelectListItem { Text = "Audit", Value = "Audit" }, new SelectListItem { Text = "Other", Value = "Other" } }, new { @style = "width:220px;" }  ) 
+                @Html.ValidationMessageFor(model => model.selectionMethod)</td>
+            
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.inspectionDeadlineDate) </td>
+            <td>@Html.TextBoxFor(model => model.inspectionDeadlineDate,  "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "date-picker form-control date-input", @id = "date-picker", @readonly = "readonly2", @style = "width:220px; font-size:19px;" }) 
+                @Html.ValidationMessageFor(model => model.inspectionDeadlineDate, "", new { @class = "text-danger" })</td>
+           
+
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.animalsToBeInspected) </td>
+            <td>@Html.TextBoxFor(model => model.animalsToBeInspected) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.AssignedUser) </td>
+            <td>
+                <input type="hidden" id="id" name="id" value="" />
+                @Html.TextBoxFor(model => model.AssignedUser, new { @id = "Psearch", @name = "Psearch" })
+                @Html.ValidationMessageFor(model => model.AssignedUser, "", new { @class = "text-danger" })
+
+            </td>
+        </tr>
+        <tr><td><br /></td></tr>
+
+    </table>
+
+    <button style="position:static;">Save</button>
+}
+
+<script>
+          // search function and autocomplete for people section
+
+            $(document).ready(function () {
+                $('#Psearch').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            dataType: 'json',
+                            type: 'Get',
+                            url: '@Url.Action("PeopleSearch", "Admin")',
+                            data: { searchstring: request.term },
+
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item
+
+                                    })
+                                );
+                            }
+                        })
+                    },
+
+
+
+
+
+                    select: function (event, ui) {
+                        $('#Psearch').val(ui.item.value);
+                        $('#id').val(ui.item.value);
+
+                        return false;
+
+                    },
+                    minLength: 1
+                })
+    });
+
+
+    $(function () {
+        $(".date-picker").datepicker({
+            dateFormat: 'dd-mm-yy',
+            todayBtn: true,
+            autoclose: true
+        });
+    })
+</script>

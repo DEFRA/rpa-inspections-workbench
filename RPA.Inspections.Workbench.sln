@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPA.Inspections.Workbench", "RPA.Inspections.Workbench\RPA.Inspections.Workbench.csproj", "{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		PREPROD|Any CPU = PREPROD|Any CPU
+		Production|Any CPU = Production|Any CPU
+		Release|Any CPU = Release|Any CPU
+		SIT|Any CPU = SIT|Any CPU
+		UAT|Any CPU = UAT|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.PREPROD|Any CPU.ActiveCfg = PREPROD|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.PREPROD|Any CPU.Build.0 = PREPROD|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Production|Any CPU.ActiveCfg = Production|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Production|Any CPU.Build.0 = Production|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.SIT|Any CPU.ActiveCfg = SIT|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.SIT|Any CPU.Build.0 = SIT|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.UAT|Any CPU.ActiveCfg = UAT|Any CPU
+		{1A0EC24E-C9B6-4DE8-A5E2-F40B76A2D4C6}.UAT|Any CPU.Build.0 = UAT|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7302FF59-9D72-42D0-8DDD-DF4E70C1F208}
+	EndGlobalSection
+EndGlobal

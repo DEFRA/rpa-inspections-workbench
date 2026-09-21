@@ -1,0 +1,94 @@
+﻿
+@model PagedList<RPA.Inspections.Workbench.Models.Holding>
+
+@{
+    ViewBag.Title = "HoldingList";
+}
+
+@using PagedList.Mvc;
+@using PagedList;
+
+<h2>Holding List</h2>
+<div>
+    <p style="font:italic">Please enter a CPH, Holding Name or Inspector ID</p>
+</div>
+
+@using (Html.BeginForm())
+{
+    <div class="float-left">
+        <input type="text" name="searchString" id="searchString" />
+    </div>
+    <div class="float-left" style="margin-left:10px">
+        <button class="button" style="position:static;" id="searchButton">Search</button>
+    </div>
+
+}
+
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Action("HoldingList", new { searchString = string.Empty })'">Clear</button>
+</div>
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Action("AddHolding", "Admin")'">Add Holding</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Admin")'">Back</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+<br />
+
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model[0].cphNumber)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].primaryName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].Active)
+        </th>
+        <th>
+            @Html.DisplayNameFor(mdoel => Model[0].AssignedUser)
+        </th>
+        <th>
+            Edit
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr id=@item.holdingId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.cphNumber)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.primaryName)
+            </td>
+            <td align="center">
+                @Html.CheckBoxFor(modelItem => item.Active, new { @disabled = "disabled" })
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.AssignedUser)
+            </td>
+            <td align="center"><button style="margin-left:10px" onclick="location.href='@Url.Action("ViewHolding", "Admin", new { HoldingId = item.holdingId })'">Edit</button></td>
+            <td>@Html.HiddenFor(modelItem => item.holdingId)</td>
+        </tr>
+    }
+
+</table>
+
+
+
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model, page => Url.Action("HoldingList", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Holdings
+</div>

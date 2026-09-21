@@ -1,0 +1,63 @@
+﻿@model List<RPA.Inspections.Workbench.Models.PackRequested>
+
+
+@{
+    ViewBag.Title = "PacksGen";
+}
+
+
+<br />
+<h3>Packs Available to Download</h3>
+
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model[0].Holding.cphNumber)
+        </th>
+
+        <th>
+            @Html.DisplayNameFor(model => model[0].Holding.primaryName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].packGenerated)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].showRef)
+        </th>
+        <th>
+            Click To Download Pack
+        </th>
+        <th>
+            Click To Delete Pack
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr id=@item.holdingId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.Holding.cphNumber)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.Holding.primaryName)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.packGenerated)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.showRef)
+            </td>
+            <td align="center">
+                <div><button onclick="location.href='@Url.Action("GetPack", "Holding", new { savePath = item.savePath })'">Download Pack</button></div>
+            </td>
+            <td align="center">
+                <div><button onclick="location.href='@Url.Action("DeletePack", "Holding", new { savePath = item.savePath, packID = item.packRequestedId })'">Delete Pack</button></div>
+            </td>
+            @Html.HiddenFor(modelItem => item.packRequestedId)
+        </tr>
+    }
+</table>
+
+

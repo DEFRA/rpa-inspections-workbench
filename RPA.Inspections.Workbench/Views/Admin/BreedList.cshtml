@@ -1,0 +1,85 @@
+﻿
+@model PagedList<RPA.Inspections.Workbench.Models.Breed>
+
+@{
+    ViewBag.Title = "BreedList";
+}
+
+@using PagedList.Mvc;
+@using PagedList;
+
+<h2>Breed List</h2>
+
+@using (Html.BeginForm())
+{
+    <div class="float-left">
+        <input type="text" name="searchString" id="searchString" />
+    </div>
+    <div class="float-left" style="margin-left:10px">
+        <button class="button" style="position:static;" id="searchButton">Search</button>
+    </div>
+
+}
+
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Action("BreedList", new { searchString = string.Empty })'">Clear</button>
+</div>
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Action("AddBreed", "Admin")'">Add Breed</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Admin")'">Back</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+
+
+
+
+<table class="table">
+    <tr>
+        <th>
+        @Html.DisplayNameFor(model => model[0].breedCode)
+        </th>
+        <th>
+        @Html.DisplayNameFor(model => model[0].breedFull)
+        </th>
+        <th>
+        @Html.DisplayNameFor(model => model[0].Active)
+        </th>
+        <th>
+         Edit
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr id= @item.breedId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.breedCode)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.breedFull)
+            </td>
+            <td align="center">
+                @Html.CheckBoxFor(modelItem => item.Active, new { @disabled = "disabled" })
+            </td>
+            <td align="center"><button style="margin-left:10px" onclick="location.href='@Url.Action("ViewBreed", "Admin", new { BreedId = item.breedId })'">Edit</button></td>
+            <td>@Html.HiddenFor(modelItem => item.breedId)</td>
+        </tr>
+     }
+
+</table>
+
+@*<input type="submit" value="Save" />*@
+
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model, page => Url.Action("BreedList", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Breeds
+</div>

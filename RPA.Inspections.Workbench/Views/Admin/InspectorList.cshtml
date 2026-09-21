@@ -1,0 +1,31 @@
+﻿@model IEnumerable<RPA.Inspections.Workbench.Models.Inspector>
+
+@{
+    ViewBag.Title = "InspectorList";
+}
+
+<h2>Inspector List</h2>
+
+<p>
+    @Html.ActionLink("Add Inspector", "AddInspector")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.staffNumber)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr style="text-align:center">
+        <td>
+            @Html.DisplayFor(modelItem => item.staffNumber)
+        </td>
+        <td>
+            @Html.ActionLink("Delete", "Delete", new { id=item.inspectorId })
+        </td>
+    </tr>
+}
+
+</table>

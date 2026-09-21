@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "_CountCattle";
+}
+
+    @if (ViewBag.List1 != 0)
+    {
+        <i>List 1: @Html.Display("List1");</i>
+    }
+    @if (ViewBag.List2 != 0)
+    {
+        <i>List 2: @Html.Display("List2");</i>
+    }
+    @if (ViewBag.Other != 0)
+    {
+        <i>Other: @Html.Display("Other");</i>
+    }

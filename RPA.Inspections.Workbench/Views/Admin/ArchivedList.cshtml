@@ -1,0 +1,80 @@
+﻿@model List<RPA.Inspections.Workbench.Models.Holding>
+
+@{
+    ViewBag.Title = "ArchivedHoldingList";
+}
+
+<h2>Archived Holding List</h2>
+
+<div>
+    <p style="font:italic">Please select a Year</p>
+</div>
+
+@foreach (var year in ViewBag.archivedYears)
+{
+    <button style="position:static;" onclick="location.href='@Url.Action("ArchivedList", "Admin", new { searchYear = year})'">@year</button>
+}
+
+
+<div>
+    <p style="font:italic">or enter a CPH or Holding Name</p>
+</div>
+
+@using (Html.BeginForm())
+{
+    <div class="float-left">
+        <input type="text" name="searchString" id="searchString" />
+    </div>
+    <div class="float-left" style="margin-left:10px">
+        <button class="button" style="position:static;" id="searchButton">Search</button>
+    </div>
+}
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Action("ArchivedList", new { searchString = string.Empty })'">Clear</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Admin")'">Back</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+<br />
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model[0].cphNumber)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].primaryName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].schemeYear)
+        </th>
+        <th>
+            View Details
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr id=@item.holdingId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.cphNumber)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.primaryName)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.schemeYear)
+            </td>
+            <td align="center"><button style="margin-left:10px" onclick="location.href='@Url.Action("ViewArchivedHolding", "Admin", new { HoldingId = item.holdingId })'">View</button></td>
+            <td>@Html.HiddenFor(modelItem => item.holdingId)</td>
+        </tr>
+    }
+
+</table>

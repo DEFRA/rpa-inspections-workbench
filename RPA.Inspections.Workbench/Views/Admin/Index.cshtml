@@ -1,0 +1,133 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+
+
+<h2>Admin Area</h2>
+<br />
+
+
+<body>
+    <div>
+        <button class="button" onclick="location.href='@Url.Action("BreedList", "Admin")'">Edit Cattle Breed List Details</button>
+        <p>Edit or Add Breeds in the Breed List</p>
+    </div>
+
+    <div>
+        <button class="button" onclick="location.href='@Url.Action("HoldingList", "Admin")'">Edit Inspection List</button>
+        <p>Edit, Add, Re-Assign or Remove Single Holdings in the Inspection List</p>
+    </div>
+    <div>
+        <button class="button" onclick="location.href='@Url.Action("InspectorList", "Admin")'">Edit Inspector List</button>
+        <p>Add or Remove Inspectors from the Inspector List</p>
+    </div>
+    <div>
+        <button class="button" onclick="location.href='@Url.Action("ArchivedList", "Admin")'">View Archived Data</button>
+        <p>View Holdings on Archived Inspection Lists</p>
+    </div>
+    <div>
+        <button class="button" onclick="location.href='@Url.Action("SchemeYearAdmin", "Admin")'">View Scheme Years</button>
+        <p>View Active Scheme Years and Add New Scheme Years</p>
+    </div>
+
+    <br />
+    @if (User.IsInRole("CI Inspections Workbench: Super User"))
+    {
+
+        using (Html.BeginForm("Index", "Admin", FormMethod.Post, new { enctype = "multipart/form-data", @id = "frmBulk" }))
+        {
+
+            @Html.AntiForgeryToken()
+
+            <h5> Add To Inspection List </h5>
+            <p>Add a full new Inspection List or bulk load additions to the Inspection List</p>
+            <input type="file" class="hidden" id="bulkSource" name="bulkSource" />
+            <input type="checkbox" name="deleteAll" id="deleteAll" value="false" checked="checked" hidden="hidden" />
+        }
+        <label class="button" for="bulkSource">Browse...</label>
+        <div id="selectedFile" style="color:green;"></div>
+        <p>Please Note file must be in XLSX format and Larger Files Make Take a Little Time To Load</p>
+        <button id="runBulk">Upload Selected List</button>
+
+
+        <div class="modal"><!-- Place at bottom of page --></div>
+
+        <div id="dialog_box" style="display: none;">
+            Delete Existing Scheme Year Data? (this will not remove archived data)
+        </div>
+    }
+</body> 
+<script>
+    $("#bulkSource").change(function (event) {
+        var files = event.target.files;
+        
+        if (files.length > 0) {
+            $("#selectedFile").text(files[0].name);
+        }
+    });
+
+
+    $body = $("body");
+
+    $("#runBulk").click(function () {
+
+        var bs = $("#bulkSource").val();
+        var FileType = bs.split(".").pop(); 
+
+        if (bs == '') {
+            alert("No Valid File Selected. To Select File Click Browse...")
+        }
+
+
+        else if (FileType != "xlsx")
+        {
+            alert("You have attempted to load a file of type " +FileType +". Please select a file with extension .xlsx");
+        }
+        else
+        {
+
+                $('#dialog_box').dialog({
+                    
+                    title: 'Delete All Existing Data?',
+                    width: 300,
+                    height: 150,
+                    modal: true,
+                    resizable: false,
+                    draggable: false,
+                    
+                    buttons: [{
+                        id: 'YesBtn',
+                        text: 'Yes',
+                        
+                        click: function(){
+                        
+                            $('input:checkbox[name=deleteAll]').prop("value", true);
+         
+                        
+                            $(this).dialog('close');
+                            $("#frmBulk").submit();
+
+                        }
+                    },
+                    {
+                        text: 'No',
+                        id: 'NoBtn',
+                        click: function () {
+                            $(this).dialog('close');
+                            $("#frmBulk").submit();
+                        }
+                    }],
+                    open: function() {$('#NoBtn').focus();}
+
+                });
+
+            }
+            }
+        )
+
+        </script>

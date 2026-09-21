@@ -1,0 +1,54 @@
+﻿@model List<RPA.Inspections.Workbench.Models.Control>
+
+@{
+    ViewBag.Title = "SchemeYearAdmin";
+}
+
+<div class="float-right">
+
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Admin")'">Back</button>
+</div>
+
+<h2>Scheme Year Admin</h2>
+
+@using (Html.BeginForm("SchemeYearAdmin", "Admin", FormMethod.Post, new { @id = "SchemeYearAdmin" }))
+{
+    @Html.AntiForgeryToken()
+
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Value)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Active)
+            </th>
+
+        </tr>
+
+        @for (int i = 0; i < Model.Count; i++)
+        {
+    <tr>
+        @Html.HiddenFor(model => Model[i].ControlId)
+        @Html.HiddenFor(model => Model[i].Property)
+        @Html.HiddenFor(model => Model[i].Value)
+        <td style="text-align:center">
+            @Html.DisplayFor(model => Model[i].Value)
+        </td>
+        <td style="text-align:center">
+            @Html.CheckBoxFor(model => Model[i].Active)
+        </td>
+
+    </tr>
+        }
+
+    </table>
+
+<div class="form-group">
+    <input type="submit" value="Save Active Scheme Years" class="button" />
+</div>
+}
+
+<div>
+    <button style="position:static; " onclick="location.href='@Url.Action("AddSchemeYear", "Admin")'">Add Next Scheme Year</button>
+</div>

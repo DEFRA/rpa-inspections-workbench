@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="dfbbe651ba5249c49caf02eb91a94e02" Name="Diagram1" ZoomLevel="93">
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.C__MigrationHistory" Width="1.5" PointX="14.875" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.Breed" Width="1.5" PointX="3.875" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.Cattle" Width="1.5" PointX="6" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.DataRequested" Width="1.5" PointX="6" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.Holding" Width="1.5" PointX="1.625" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.LinkedHolding" Width="1.5" PointX="8.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="RPA.Inspections.WorkbenchModel.PackRequested" Width="1.5" PointX="3.75" PointY="5.875" IsExpanded="true" />
+        <AssociationConnector Association="RPA.Inspections.WorkbenchModel.FK_IW_Cattle_IW_Breed_breedId" ManuallyRouted="false" />
+        <AssociationConnector Association="RPA.Inspections.WorkbenchModel.FK_IW_Cattle_IW_Holding_holdingId" ManuallyRouted="false" />
+        <AssociationConnector Association="RPA.Inspections.WorkbenchModel.FK_IW_DataRequested_IW_Holding_Holding_holdingId" ManuallyRouted="false" />
+        <AssociationConnector Association="RPA.Inspections.WorkbenchModel.FK_IW_LinkedHolding_IW_Holding_holdingId" ManuallyRouted="false" />
+        <AssociationConnector Association="RPA.Inspections.WorkbenchModel.FK_IW_PackRequested_IW_Holding_holdingId" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

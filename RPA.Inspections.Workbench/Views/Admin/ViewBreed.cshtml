@@ -1,0 +1,42 @@
+﻿@model RPA.Inspections.Workbench.Models.Breed
+
+
+@{
+    ViewBag.Title = "ViewBreed";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Action("BreedList", "Admin")'">Back</button>
+</div>
+
+<h2>Edit Breed</h2>
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+<table>
+    <tr><td><br /></td></tr>
+    <tr style="font-size:18px">
+        <td>@Html.LabelFor(model => model.breedCode) </td>
+        <td>@Html.TextBoxFor(model => model.breedCode) </td>
+    </tr>
+    <tr><td><br /></td></tr>
+    <tr style="font-size:18px">
+        <td>@Html.LabelFor(model => model.breedFull) </td>
+        <td>@Html.TextBoxFor(model => model.breedFull) </td>
+    </tr>
+    <tr><td><br /></td></tr>
+    <tr style="font-size:18px">
+        <td>@Html.LabelFor(model => model.Active) </td>
+        <td>@Html.CheckBoxFor(model => model.Active) </td>
+    </tr>
+    <tr><td><br /></td></tr>
+</table>
+
+<button style="position:static;">Save</button>
+
+}

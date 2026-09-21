@@ -1,0 +1,73 @@
+﻿@model RPA.Inspections.Workbench.Models.Inspector
+
+@{
+    ViewBag.Title = "Add Inspector";
+}
+
+<h2>Add Inspector</h2>
+
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.staffNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.staffNumber, new { @id = "Psearch", @name = "Psearch" })
+                @Html.ValidationMessageFor(model => model.staffNumber, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add Inspector" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "InspectorList")
+</div>
+
+<script>
+          // search function and autocomplete for people section
+
+            $(document).ready(function () {
+                $('#Psearch').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            dataType: 'json',
+                            type: 'Get',
+                            url: '@Url.Action("PeopleSearch", "Admin")',
+                            data: { searchstring: request.term },
+
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item
+
+                                    })
+                                );
+                            }
+                        })
+                    },
+
+
+
+
+
+                    select: function (event, ui) {
+                        $('#Psearch').val(ui.item.value);
+                        $('#id').val(ui.item.value);
+
+                        return false;
+
+                    },
+                    minLength: 1
+                })
+    });
+
+</script>

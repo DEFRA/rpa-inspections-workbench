@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<h2>Main Menu</h2>
+
+@*<h2 style="color:red">TEST MODE ONLY! DO NOT REQUEST PACKS UNLESS YOU HAVE BEEN AUTHORISED TO DO SO</h2>*@
+
+
+
+<div class="container half float-left">
+    <br />
+
+    <div class="float-left clear-both">
+
+        <button class="button" onclick="location.href='@Url.Action("Index", "Holding")'">Find/View Holdings</button>
+
+
+        <p>Search for a Holding</p>
+
+    </div>
+
+    <div class="float-left clear-both">
+
+        <button class="button" onclick="location.href='@Url.Action("PacksRequested", "Holding")'">Pack Requests</button>
+
+        <p>View Your Animal Data Pack Requests</p>
+    </div>
+
+    @if (User.IsInRole("CI Inspections Workbench: Admin User"))
+    {
+        <div class="float-left clear-both">
+
+            <button class="button" onclick="location.href='@Url.Action("Index", "Admin")'">Admin Area</button>
+
+            <p>Admin Area which includes Breed Edit and Inspection List Upload</p>
+        </div>
+    }
+
+    @if (User.IsInRole("CI Inspections Workbench: BCMS Sev Calc Generator"))
+    {
+        <div class="float-left clear-both">
+
+            <button class="button" onclick="location.href='@Url.Action("Index", "BcmsAdmin")'">BCMS Admin Area</button>
+
+            <p>BCMS Admin Area which includes managing the Severity Calculator generation</p>
+
+        </div>
+    }
+    @*<div><button onclick="location.href='@Url.Action("TestMethods", "Holding")'">TEST</button></div>*@
+
+</div>
+
+<div class="container half float-left clear-none no-mobile">
+    <div class="float-left clear-both">
+        <img class="border-none" src="~/Images/cattlelogo.jpg" />
+    </div>
+    <div class="float-left clear-both img-detail">
+        <p>
+
+            CI Inspections Workbench is an application which allows inspectors to view various holdings and their cattle then subsequently request Excel Inspection Packs.
+
+        </p>
+    </div>
+</div>
+
+<div class="info-label">
+    DEFRA DDTS Development Team
+</div>

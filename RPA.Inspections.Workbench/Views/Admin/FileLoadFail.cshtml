@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewBag.Title = "FileLoadFail";
+}
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Admin")'">Back</button>
+</div>
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</div>
+
+
+
+<h2>Unable To Load File</h2>
+<br />
+
+
+<body>
+
+    <h5 style="color:red">@ViewBag.ErrorMessage </h5>
+
+<h5 style="color:red">The Workbench has been unable to load the holding data in the spreadsheet selected. Please ensure you are using the correct upload template and all data validations below have been met in your data. </h5>
+    <br>
+
+<table border="1">
+<tr>
+    <td>CPH</td>
+    <td>All CPH's must be in the format NN/NNN/NNNN</td>
+</tr>
+<tr>
+    <td>SBI</td>
+    <td>SBI's must contain 9 digits. If no SBI is available the cell should be left blank or 0 should be entered.</td>
+</tr>
+<tr>
+    <td>Scheme Year (Scheme Name (Full) in spreadsheet)</td>
+    <td>Scheme year can be entered either as a four digit year (i.e. 2017) or a 2 digit year with a CII prefix (i.e. CII16 or CIIAH16) and must not be blank.</td>
+</tr>
+<tr>
+    <td>Selection Method</td>
+    <td>A Selection Method of either Risk, Random, Targeted, Audit or Other must be entered for each holding.</td>
+</tr>
+<tr>
+    <td>Inspection Deadline Date</td>
+    <td>Ensure a date is entered in the following format 01/01/2017</td>
+</tr>
+<tr>
+    <td>Animals to be Inspected</td>
+    <td>Ensure a numerical value is entered or the cell is left blank</td>
+</tr>
+
+</table>
+<br />
+    <h5 style="color:red">Please check your data and re-submit</h5>
+
+</body>

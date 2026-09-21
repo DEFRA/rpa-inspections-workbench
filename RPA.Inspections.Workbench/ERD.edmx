@@ -1,0 +1,555 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="RPA.Inspections.WorkbenchModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="__MigrationHistory">
+          <Key>
+            <PropertyRef Name="MigrationId" />
+            <PropertyRef Name="ContextKey" />
+          </Key>
+          <Property Name="MigrationId" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="ContextKey" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Model" Type="varbinary(max)" Nullable="false" />
+          <Property Name="ProductVersion" Type="nvarchar" MaxLength="32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Breed">
+          <Key>
+            <PropertyRef Name="breedId" />
+          </Key>
+          <Property Name="breedId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="breedCode" Type="nvarchar(max)" />
+          <Property Name="breedFull" Type="nvarchar(max)" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Cattle">
+          <Key>
+            <PropertyRef Name="cattleId" />
+          </Key>
+          <Property Name="cattleId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="holdingId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="earTag" Type="nvarchar(max)" />
+          <Property Name="listNumber" Type="nvarchar(max)" />
+          <Property Name="breedId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="passportVersion" Type="nvarchar(max)" />
+          <Property Name="birthDate" Type="datetime" />
+          <Property Name="onDate" Type="datetime" />
+          <Property Name="damId" Type="nvarchar(max)" />
+          <Property Name="offDate" Type="datetime" />
+          <Property Name="deathDate" Type="datetime" />
+          <Property Name="gender" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="DataRequested">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="dataRequested" Type="datetime" Nullable="false" />
+          <Property Name="dataRecieved" Type="datetime" />
+          <Property Name="Holding_holdingId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="Holding">
+          <Key>
+            <PropertyRef Name="holdingId" />
+          </Key>
+          <Property Name="holdingId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="cphNumber" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="SBI" Type="int" />
+          <Property Name="primaryName" Type="nvarchar(max)" />
+          <Property Name="addressLine1" Type="nvarchar(max)" />
+          <Property Name="addressLine2" Type="nvarchar(max)" />
+          <Property Name="addressLine3" Type="nvarchar(max)" />
+          <Property Name="region" Type="nvarchar(max)" />
+          <Property Name="postCode" Type="nvarchar(max)" />
+          <Property Name="telephoneNumber" Type="nvarchar(max)" />
+          <Property Name="mobileNumber" Type="nvarchar(max)" />
+          <Property Name="faxNumber" Type="nvarchar(max)" />
+          <Property Name="inspectionDeadlineDate" Type="datetime" />
+          <Property Name="animalsToBeInspected" Type="int" />
+          <Property Name="lastDataRefresh" Type="datetime" />
+          <Property Name="selectionMethod" Type="nvarchar(max)" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="lastDataRequest" Type="datetime" />
+          <Property Name="schemeYear" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="LinkedHolding">
+          <Key>
+            <PropertyRef Name="linkedHoldingId" />
+          </Key>
+          <Property Name="linkedHoldingId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="holdingId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="CPHNumberLH" Type="nvarchar(max)" />
+          <Property Name="primaryNameLH" Type="nvarchar(max)" />
+          <Property Name="secondaryNameLH" Type="nvarchar(max)" />
+          <Property Name="addressLine1LH" Type="nvarchar(max)" />
+          <Property Name="addressLine2LH" Type="nvarchar(max)" />
+          <Property Name="addressLine3LH" Type="nvarchar(max)" />
+          <Property Name="regionLH" Type="nvarchar(max)" />
+          <Property Name="PostCodeLH" Type="nvarchar(max)" />
+          <Property Name="locNum" Type="int" />
+          <Property Name="isLink" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="PackRequested">
+          <Key>
+            <PropertyRef Name="packRequestedId" />
+          </Key>
+          <Property Name="packRequestedId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="holdingId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="activeRequest" Type="bit" Nullable="false" />
+          <Property Name="datePackRequested" Type="datetime" Nullable="false" />
+          <Property Name="requestedBy" Type="nvarchar(max)" />
+          <Property Name="requestorEmail" Type="nvarchar(max)" />
+          <Property Name="packGenerated" Type="datetime" />
+          <Property Name="savePath" Type="nvarchar(max)" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="display" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_IW_Cattle_IW_Breed_breedId">
+          <End Role="Breed" Type="Self.Breed" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Cattle" Type="Self.Cattle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Breed">
+              <PropertyRef Name="breedId" />
+            </Principal>
+            <Dependent Role="Cattle">
+              <PropertyRef Name="breedId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_Cattle_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Cattle" Type="Self.Cattle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="Cattle">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_DataRequested_IW_Holding_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="0..1" />
+          <End Role="DataRequested" Type="Self.DataRequested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="DataRequested">
+              <PropertyRef Name="Holding_holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_LinkedHolding_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LinkedHolding" Type="Self.LinkedHolding" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="LinkedHolding">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_PackRequested_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="PackRequested" Type="Self.PackRequested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="PackRequested">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="RPAInspectionsWorkbenchModelStoreContainer">
+          <EntitySet Name="__MigrationHistory" EntityType="Self.__MigrationHistory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Breed" EntityType="Self.Breed" Schema="IW" store:Type="Tables" />
+          <EntitySet Name="Cattle" EntityType="Self.Cattle" Schema="IW" store:Type="Tables" />
+          <EntitySet Name="DataRequested" EntityType="Self.DataRequested" Schema="IW" store:Type="Tables" />
+          <EntitySet Name="Holding" EntityType="Self.Holding" Schema="IW" store:Type="Tables" />
+          <EntitySet Name="LinkedHolding" EntityType="Self.LinkedHolding" Schema="IW" store:Type="Tables" />
+          <EntitySet Name="PackRequested" EntityType="Self.PackRequested" Schema="IW" store:Type="Tables" />
+          <AssociationSet Name="FK_IW_Cattle_IW_Breed_breedId" Association="Self.FK_IW_Cattle_IW_Breed_breedId">
+            <End Role="Breed" EntitySet="Breed" />
+            <End Role="Cattle" EntitySet="Cattle" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_Cattle_IW_Holding_holdingId" Association="Self.FK_IW_Cattle_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holding" />
+            <End Role="Cattle" EntitySet="Cattle" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_DataRequested_IW_Holding_Holding_holdingId" Association="Self.FK_IW_DataRequested_IW_Holding_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holding" />
+            <End Role="DataRequested" EntitySet="DataRequested" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_LinkedHolding_IW_Holding_holdingId" Association="Self.FK_IW_LinkedHolding_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holding" />
+            <End Role="LinkedHolding" EntitySet="LinkedHolding" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_PackRequested_IW_Holding_holdingId" Association="Self.FK_IW_PackRequested_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holding" />
+            <End Role="PackRequested" EntitySet="PackRequested" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="RPA.Inspections.WorkbenchModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="C__MigrationHistory">
+          <Key>
+            <PropertyRef Name="MigrationId" />
+            <PropertyRef Name="ContextKey" />
+          </Key>
+          <Property Name="MigrationId" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ContextKey" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Model" Type="Binary" MaxLength="Max" FixedLength="false" Nullable="false" />
+          <Property Name="ProductVersion" Type="String" MaxLength="32" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Breed">
+          <Key>
+            <PropertyRef Name="breedId" />
+          </Key>
+          <Property Name="breedId" Type="Guid" Nullable="false" />
+          <Property Name="breedCode" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="breedFull" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Cattle" Relationship="Self.FK_IW_Cattle_IW_Breed_breedId" FromRole="Breed" ToRole="Cattle" />
+        </EntityType>
+        <EntityType Name="Cattle">
+          <Key>
+            <PropertyRef Name="cattleId" />
+          </Key>
+          <Property Name="cattleId" Type="Guid" Nullable="false" />
+          <Property Name="holdingId" Type="Guid" Nullable="false" />
+          <Property Name="earTag" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="listNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="breedId" Type="Guid" Nullable="false" />
+          <Property Name="passportVersion" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="birthDate" Type="DateTime" Precision="3" />
+          <Property Name="onDate" Type="DateTime" Precision="3" />
+          <Property Name="damId" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="offDate" Type="DateTime" Precision="3" />
+          <Property Name="deathDate" Type="DateTime" Precision="3" />
+          <Property Name="gender" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Breed" Relationship="Self.FK_IW_Cattle_IW_Breed_breedId" FromRole="Cattle" ToRole="Breed" />
+          <NavigationProperty Name="Holding" Relationship="Self.FK_IW_Cattle_IW_Holding_holdingId" FromRole="Cattle" ToRole="Holding" />
+        </EntityType>
+        <EntityType Name="DataRequested">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="dataRequested1" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="dataRecieved" Type="DateTime" Precision="3" />
+          <Property Name="Holding_holdingId" Type="Guid" />
+          <NavigationProperty Name="Holding" Relationship="Self.FK_IW_DataRequested_IW_Holding_Holding_holdingId" FromRole="DataRequested" ToRole="Holding" />
+        </EntityType>
+        <EntityType Name="Holding">
+          <Key>
+            <PropertyRef Name="holdingId" />
+          </Key>
+          <Property Name="holdingId" Type="Guid" Nullable="false" />
+          <Property Name="cphNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="SBI" Type="Int32" />
+          <Property Name="primaryName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine1" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine2" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine3" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="region" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="postCode" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="telephoneNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="mobileNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="faxNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="inspectionDeadlineDate" Type="DateTime" Precision="3" />
+          <Property Name="animalsToBeInspected" Type="Int32" />
+          <Property Name="lastDataRefresh" Type="DateTime" Precision="3" />
+          <Property Name="selectionMethod" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="lastDataRequest" Type="DateTime" Precision="3" />
+          <Property Name="schemeYear" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Cattle" Relationship="Self.FK_IW_Cattle_IW_Holding_holdingId" FromRole="Holding" ToRole="Cattle" />
+          <NavigationProperty Name="DataRequesteds" Relationship="Self.FK_IW_DataRequested_IW_Holding_Holding_holdingId" FromRole="Holding" ToRole="DataRequested" />
+          <NavigationProperty Name="LinkedHoldings" Relationship="Self.FK_IW_LinkedHolding_IW_Holding_holdingId" FromRole="Holding" ToRole="LinkedHolding" />
+          <NavigationProperty Name="PackRequesteds" Relationship="Self.FK_IW_PackRequested_IW_Holding_holdingId" FromRole="Holding" ToRole="PackRequested" />
+        </EntityType>
+        <EntityType Name="LinkedHolding">
+          <Key>
+            <PropertyRef Name="linkedHoldingId" />
+          </Key>
+          <Property Name="linkedHoldingId" Type="Guid" Nullable="false" />
+          <Property Name="holdingId" Type="Guid" Nullable="false" />
+          <Property Name="CPHNumberLH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="primaryNameLH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="secondaryNameLH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine1LH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine2LH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="addressLine3LH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="regionLH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PostCodeLH" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="locNum" Type="Int32" />
+          <Property Name="isLink" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Holding" Relationship="Self.FK_IW_LinkedHolding_IW_Holding_holdingId" FromRole="LinkedHolding" ToRole="Holding" />
+        </EntityType>
+        <EntityType Name="PackRequested">
+          <Key>
+            <PropertyRef Name="packRequestedId" />
+          </Key>
+          <Property Name="packRequestedId" Type="Guid" Nullable="false" />
+          <Property Name="holdingId" Type="Guid" Nullable="false" />
+          <Property Name="activeRequest" Type="Boolean" Nullable="false" />
+          <Property Name="datePackRequested" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="requestedBy" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="requestorEmail" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="packGenerated" Type="DateTime" Precision="3" />
+          <Property Name="savePath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="display" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Holding" Relationship="Self.FK_IW_PackRequested_IW_Holding_holdingId" FromRole="PackRequested" ToRole="Holding" />
+        </EntityType>
+        <Association Name="FK_IW_Cattle_IW_Breed_breedId">
+          <End Role="Breed" Type="Self.Breed" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Cattle" Type="Self.Cattle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Breed">
+              <PropertyRef Name="breedId" />
+            </Principal>
+            <Dependent Role="Cattle">
+              <PropertyRef Name="breedId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_Cattle_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Cattle" Type="Self.Cattle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="Cattle">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_DataRequested_IW_Holding_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="0..1" />
+          <End Role="DataRequested" Type="Self.DataRequested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="DataRequested">
+              <PropertyRef Name="Holding_holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_LinkedHolding_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LinkedHolding" Type="Self.LinkedHolding" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="LinkedHolding">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_IW_PackRequested_IW_Holding_holdingId">
+          <End Role="Holding" Type="Self.Holding" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="PackRequested" Type="Self.PackRequested" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Holding">
+              <PropertyRef Name="holdingId" />
+            </Principal>
+            <Dependent Role="PackRequested">
+              <PropertyRef Name="holdingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="C__MigrationHistory" EntityType="Self.C__MigrationHistory" />
+          <EntitySet Name="Breeds" EntityType="Self.Breed" />
+          <EntitySet Name="Cattle" EntityType="Self.Cattle" />
+          <EntitySet Name="DataRequesteds" EntityType="Self.DataRequested" />
+          <EntitySet Name="Holdings" EntityType="Self.Holding" />
+          <EntitySet Name="LinkedHoldings" EntityType="Self.LinkedHolding" />
+          <EntitySet Name="PackRequesteds" EntityType="Self.PackRequested" />
+          <AssociationSet Name="FK_IW_Cattle_IW_Breed_breedId" Association="Self.FK_IW_Cattle_IW_Breed_breedId">
+            <End Role="Breed" EntitySet="Breeds" />
+            <End Role="Cattle" EntitySet="Cattle" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_Cattle_IW_Holding_holdingId" Association="Self.FK_IW_Cattle_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holdings" />
+            <End Role="Cattle" EntitySet="Cattle" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_DataRequested_IW_Holding_Holding_holdingId" Association="Self.FK_IW_DataRequested_IW_Holding_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holdings" />
+            <End Role="DataRequested" EntitySet="DataRequesteds" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_LinkedHolding_IW_Holding_holdingId" Association="Self.FK_IW_LinkedHolding_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holdings" />
+            <End Role="LinkedHolding" EntitySet="LinkedHoldings" />
+          </AssociationSet>
+          <AssociationSet Name="FK_IW_PackRequested_IW_Holding_holdingId" Association="Self.FK_IW_PackRequested_IW_Holding_holdingId">
+            <End Role="Holding" EntitySet="Holdings" />
+            <End Role="PackRequested" EntitySet="PackRequesteds" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="RPAInspectionsWorkbenchModelStoreContainer" CdmEntityContainer="Entities">
+          <EntitySetMapping Name="C__MigrationHistory">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.C__MigrationHistory">
+              <MappingFragment StoreEntitySet="__MigrationHistory">
+                <ScalarProperty Name="MigrationId" ColumnName="MigrationId" />
+                <ScalarProperty Name="ContextKey" ColumnName="ContextKey" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="ProductVersion" ColumnName="ProductVersion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Breeds">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.Breed">
+              <MappingFragment StoreEntitySet="Breed">
+                <ScalarProperty Name="breedId" ColumnName="breedId" />
+                <ScalarProperty Name="breedCode" ColumnName="breedCode" />
+                <ScalarProperty Name="breedFull" ColumnName="breedFull" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Cattle">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.Cattle">
+              <MappingFragment StoreEntitySet="Cattle">
+                <ScalarProperty Name="cattleId" ColumnName="cattleId" />
+                <ScalarProperty Name="holdingId" ColumnName="holdingId" />
+                <ScalarProperty Name="earTag" ColumnName="earTag" />
+                <ScalarProperty Name="listNumber" ColumnName="listNumber" />
+                <ScalarProperty Name="breedId" ColumnName="breedId" />
+                <ScalarProperty Name="passportVersion" ColumnName="passportVersion" />
+                <ScalarProperty Name="birthDate" ColumnName="birthDate" />
+                <ScalarProperty Name="onDate" ColumnName="onDate" />
+                <ScalarProperty Name="damId" ColumnName="damId" />
+                <ScalarProperty Name="offDate" ColumnName="offDate" />
+                <ScalarProperty Name="deathDate" ColumnName="deathDate" />
+                <ScalarProperty Name="gender" ColumnName="gender" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataRequesteds">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.DataRequested">
+              <MappingFragment StoreEntitySet="DataRequested">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="dataRequested1" ColumnName="dataRequested" />
+                <ScalarProperty Name="dataRecieved" ColumnName="dataRecieved" />
+                <ScalarProperty Name="Holding_holdingId" ColumnName="Holding_holdingId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Holdings">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.Holding">
+              <MappingFragment StoreEntitySet="Holding">
+                <ScalarProperty Name="holdingId" ColumnName="holdingId" />
+                <ScalarProperty Name="cphNumber" ColumnName="cphNumber" />
+                <ScalarProperty Name="SBI" ColumnName="SBI" />
+                <ScalarProperty Name="primaryName" ColumnName="primaryName" />
+                <ScalarProperty Name="addressLine1" ColumnName="addressLine1" />
+                <ScalarProperty Name="addressLine2" ColumnName="addressLine2" />
+                <ScalarProperty Name="addressLine3" ColumnName="addressLine3" />
+                <ScalarProperty Name="region" ColumnName="region" />
+                <ScalarProperty Name="postCode" ColumnName="postCode" />
+                <ScalarProperty Name="telephoneNumber" ColumnName="telephoneNumber" />
+                <ScalarProperty Name="mobileNumber" ColumnName="mobileNumber" />
+                <ScalarProperty Name="faxNumber" ColumnName="faxNumber" />
+                <ScalarProperty Name="inspectionDeadlineDate" ColumnName="inspectionDeadlineDate" />
+                <ScalarProperty Name="animalsToBeInspected" ColumnName="animalsToBeInspected" />
+                <ScalarProperty Name="lastDataRefresh" ColumnName="lastDataRefresh" />
+                <ScalarProperty Name="selectionMethod" ColumnName="selectionMethod" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="lastDataRequest" ColumnName="lastDataRequest" />
+                <ScalarProperty Name="schemeYear" ColumnName="schemeYear" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LinkedHoldings">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.LinkedHolding">
+              <MappingFragment StoreEntitySet="LinkedHolding">
+                <ScalarProperty Name="linkedHoldingId" ColumnName="linkedHoldingId" />
+                <ScalarProperty Name="holdingId" ColumnName="holdingId" />
+                <ScalarProperty Name="CPHNumberLH" ColumnName="CPHNumberLH" />
+                <ScalarProperty Name="primaryNameLH" ColumnName="primaryNameLH" />
+                <ScalarProperty Name="secondaryNameLH" ColumnName="secondaryNameLH" />
+                <ScalarProperty Name="addressLine1LH" ColumnName="addressLine1LH" />
+                <ScalarProperty Name="addressLine2LH" ColumnName="addressLine2LH" />
+                <ScalarProperty Name="addressLine3LH" ColumnName="addressLine3LH" />
+                <ScalarProperty Name="regionLH" ColumnName="regionLH" />
+                <ScalarProperty Name="PostCodeLH" ColumnName="PostCodeLH" />
+                <ScalarProperty Name="locNum" ColumnName="locNum" />
+                <ScalarProperty Name="isLink" ColumnName="isLink" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PackRequesteds">
+            <EntityTypeMapping TypeName="RPA.Inspections.WorkbenchModel.PackRequested">
+              <MappingFragment StoreEntitySet="PackRequested">
+                <ScalarProperty Name="packRequestedId" ColumnName="packRequestedId" />
+                <ScalarProperty Name="holdingId" ColumnName="holdingId" />
+                <ScalarProperty Name="activeRequest" ColumnName="activeRequest" />
+                <ScalarProperty Name="datePackRequested" ColumnName="datePackRequested" />
+                <ScalarProperty Name="requestedBy" ColumnName="requestedBy" />
+                <ScalarProperty Name="requestorEmail" ColumnName="requestorEmail" />
+                <ScalarProperty Name="packGenerated" ColumnName="packGenerated" />
+                <ScalarProperty Name="savePath" ColumnName="savePath" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="display" ColumnName="display" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
