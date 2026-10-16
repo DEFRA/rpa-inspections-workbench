@@ -1,8 +1,8 @@
-﻿using Moq;
+using Microsoft.AspNetCore.Http;
+using Moq;
 using NUnit.Framework;
-using PagedList;
+using X.PagedList;
 using RPA.Inspections.Workbench.Controllers;
-using RPA.Inspections.Workbench.Factory;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services;
@@ -12,8 +12,7 @@ using RPA.Inspections.Workbench.Tests.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Tests.Controllers
 {
@@ -42,7 +41,7 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
 
-            userHelper = new UserHelper(peopleContext.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
             filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
             holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
 
@@ -54,8 +53,6 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             
             holidayService = new Mock<IHolidayService>();
             packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
-
-            HttpContextManager.SetCurrentContext(MockHttpContext.GetMockedHttpContext());
 
             controller = new AdminController(context.MockContext.Object, peopleContext.MockContext.Object, holdingService, cattleService, breedService, packRequestedService, mailService.Object, fileService.Object, filterService, userHelper, sendService.Object, holidayService.Object);
 
@@ -77,9 +74,9 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         public void Test_Index_Post_Returns_Index_Page()
 
         {
-            Mock<HttpPostedFileBase> uploadedFile = new Mock<HttpPostedFileBase>();
+            Mock<IFormFile> uploadedFile = new Mock<IFormFile>();
 
-            var result = controller.Index(uploadedFile.Object, true) as RedirectToRouteResult;
+            var result = controller.Index(uploadedFile.Object, true) as RedirectToActionResult;
 
             Assert.IsNotNull(result);
         }
@@ -372,9 +369,9 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         {
             JsonResult result = controller.PeopleSearch("Gordon, [REDACTED_NAME]") as JsonResult;
 
-            var actual = ((IEnumerable<dynamic>)result.Data).ToList();
+            var actual = ((IEnumerable<dynamic>)result.Value).ToList();
 
-            Assert.AreEqual("{ label = Gordon, [REDACTED_NAME], value = [REDACTED_PASSPORT] }", actual[0].ToString());
+            Assert.AreEqual("{ label = Gordon, [REDACTED_NAME], value = M600300 }", actual[0].ToString());
         }
 
         [Test]
@@ -382,16 +379,16 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         {
             JsonResult result = controller.PeopleSearch("M600300") as JsonResult;
 
-            var actual = ((IEnumerable<dynamic>)result.Data).ToList();
+            var actual = ((IEnumerable<dynamic>)result.Value).ToList();
 
-            Assert.AreEqual("{ label = Gordon, [REDACTED_NAME], value = [REDACTED_PASSPORT] }", actual[0].ToString());
+            Assert.AreEqual("{ label = Gordon, [REDACTED_NAME], value = M600300 }", actual[0].ToString());
         }
 
         //[Test]
 
         //public void Test_Index_Post()
         //{
-        //    Mock<HttpPostedFileBase> uploadedFile = new Mock<HttpPostedFileBase>();
+        //    Mock<IFormFile> uploadedFile = new Mock<IFormFile>();
 
         //    var result = controller.Index(uploadedFile, false) as ViewResult;
         //}

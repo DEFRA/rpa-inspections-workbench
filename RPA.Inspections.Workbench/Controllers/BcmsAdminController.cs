@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using Microsoft.AspNetCore.Authorization;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Models;
 using System;
@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
@@ -18,18 +17,13 @@ namespace RPA.Inspections.Workbench.Controllers
         IWorkbenchContext db;
 
 
-        public BcmsAdminController()
-        {
-           db = new WorkbenchContext();
-        }
-
         public BcmsAdminController(IWorkbenchContext db)
         {
             this.db = db;
         }
 
         //Get: Bcms Admin page
-        public ActionResult Index()
+        public IActionResult Index()
         {
             List<BcmsRequested> bcmsRequestedList = db.BcmsRequested.OrderByDescending(x => x.DatePackRequested).Take(10).ToList();
 
@@ -38,7 +32,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         //Bulk Request
-        public ActionResult BulkRequest(DateTime startDate, DateTime endDate)
+        public IActionResult BulkRequest(DateTime startDate, DateTime endDate)
         {
             BcmsRequested bcmsRequested = new BcmsRequested();
 
@@ -58,7 +52,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         //Spec Request
-        public ActionResult SpecificRequest(string cph, int schemeYear)
+        public IActionResult SpecificRequest(string cph, int schemeYear)
         {
             BcmsRequested bcmsRequested = new BcmsRequested();
 
@@ -77,10 +71,16 @@ namespace RPA.Inspections.Workbench.Controllers
             return RedirectToAction("Index");
         }
 
-        public ActionResult open_report(string name)
+        public IActionResult open_report(string name)
         {
             
-            return new FilePathResult(name, "text/html");
+            // Only reports that were generated for a BCMS request can be opened
+            if (!db.BcmsRequested.Any(x => x.Filepath == name))
+            {
+                return NotFound();
+            }
+
+            return PhysicalFile(name, "text/html");
 
         }
     }

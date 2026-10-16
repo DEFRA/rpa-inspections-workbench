@@ -1,5 +1,4 @@
-﻿using PagedList;
-using RPA.Inspections.Workbench.Configuration;
+using X.PagedList;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
@@ -11,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {

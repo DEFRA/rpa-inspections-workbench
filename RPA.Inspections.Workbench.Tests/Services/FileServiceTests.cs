@@ -1,7 +1,6 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
-using RPA.Inspections.Workbench.Factory;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services;
@@ -47,11 +46,9 @@ namespace RPA.Inspections.Workbench.Tests.SL
             holidayService = new Mock<IHolidayService>();
             mailService = new Mock<IMailService>();
             filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
-            userHelper = new UserHelper(peopleContext.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
             holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
             fileService = new FileService(context.MockContext.Object, cattleService, holdingService, sendService.Object, mailService.Object, holidayService.Object);
-
-            HttpContextManager.SetCurrentContext(MockHttpContext.GetMockedHttpContext());
         }
 
         [Test]
@@ -198,7 +195,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
             //Assert
 
 
-            Assert.AreEqual((AppDomain.CurrentDomain.BaseDirectory + "Uploads\\Test"), result);
+            Assert.AreEqual(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads", "Test"), result);
 
         }
 

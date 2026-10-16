@@ -1,4 +1,4 @@
-﻿using PagedList;
+using X.PagedList;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
@@ -9,8 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
@@ -30,24 +29,6 @@ namespace RPA.Inspections.Workbench.Controllers
         IFilterService filterService;
         IUserHelper userHelper;
         IHolidayService holidayService;
-        public HoldingController()
-        {
-            db = new WorkbenchContext();
-            Pdb = new PeopleContext();
-            userHelper = new UserHelper(Pdb);
-            filterService = new FilterService(db, Pdb);
-            holdingService = new HoldingService(db, Pdb, filterService, userHelper);
-            linkedHoldingService = new LinkedHoldingService(db);
-            cattleService = new CattleService(db);
-            sendService = new SendService();
-            mailService = new MailService(db);
-            holidayService = new HolidayService();
-            packRequestedService = new PackRequestedService(db, mailService, userHelper, sendService);
-            fileService = new FileService(db, cattleService, holdingService, sendService, mailService, holidayService);
-
-        }
-
-
         public HoldingController(IWorkbenchContext db, IPeopleContext Pdb, IHoldingService holdingService, ILinkedHoldingService linkedHoldingService, ICattleService cattleService, IPackRequested packRequestedService, IMailService mailService, IFileService fileService, IFilterService filterService, IUserHelper userHelper, ISendService sendService, IHolidayService holidayService)
         {
             this.db = db;
@@ -67,7 +48,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
 
         // GET: Holding
-        public ActionResult Index(string searchstring = null, int page = 1, int pageSize = 10)
+        public IActionResult Index(string searchstring = null, int page = 1, int pageSize = 10)
 
         {
 
@@ -94,8 +75,8 @@ namespace RPA.Inspections.Workbench.Controllers
         }
 
         //GET: All Packs Requested
-        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "None")]
-        public ActionResult PacksRequested()
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public IActionResult PacksRequested()
         {
 
                 var model = packRequestedService.GetOutstandingPackRequests();
@@ -105,21 +86,9 @@ namespace RPA.Inspections.Workbench.Controllers
 
         }
 
-        //GET: All Generated Packs for user and display in partial view
-        public ActionResult _GeneratedPacks()
-        {
-
-                var model = packRequestedService.GetDownloadableRequests();
-
-                return PartialView(model);
-            
-
-        }
-
-
         //GET: Display Holding Overview
 
-        public ActionResult ViewHolding(Guid holdingId)
+        public IActionResult ViewHolding(Guid holdingId)
         {
 
                 string userid = userHelper.CurrentUser();
@@ -134,83 +103,9 @@ namespace RPA.Inspections.Workbench.Controllers
 
         }
 
-        //GET: Display Linked Holdings in Partial View
-
-        public ActionResult _ViewLinkedHoldings(Guid holdingId)
-        {
-
-                List<LinkedHolding> model = linkedHoldingService.GetLinkedholdingById(holdingId);
-
-                ViewBag.linkedIdHolding = holdingId;
-
-                return PartialView(model);
-
-        }
-
-        //GET: Display Cattle in Partial View
-
-        public ActionResult _ViewCattle(Guid holdingId)
-        {
-
-                List<Cattle> model = cattleService.GetCattleByHoldingId(holdingId);
-
-                ViewBag.cattleIdholding = holdingId;
-
-                return PartialView(model);
-
-        }
-
-        //GET: Display Late Cattle in Partial View
-
-        public ActionResult _LateCattle(Guid holdingId)
-        {
-
-                List<Cattle> model = cattleService.GetLateCattle(holdingId);
-
-                ViewBag.cattleIdholding = holdingId;
-
-                return PartialView(model);
-
-        }
-
-        //GET: Display Cattle Count in Partial View
-
-        public ActionResult _CountCattle(Guid holdingId)
-        {
-
-                List<Cattle> model = cattleService.GetCattleByHoldingId(holdingId);
-
-                DateTime offDateTest = DateTime.Now.AddYears(-1);
-                DateTime offDeathTest = DateTime.Now.AddDays(-28);
-
-                ViewBag.cattleIdholding = holdingId;
-
-                ViewBag.List1 = model.Where(x => x.listNumber == "LIST1").Count();
-
-                ViewBag.List2 = model.Where(x => x.listNumber == "LIST2").Count();
-
-                ViewBag.Other = model.Where(x => x.listNumber == "").Count();
-
-                return PartialView(model);
-
-        }
-
-        //GET: Display Pack Requested in Partial View
-
-        public ActionResult _ViewPackRequested(Guid holdingId)
-        {
-
-                PackRequested model = packRequestedService.GetPackRequestedById(holdingId);
-
-                ViewBag.PackReqHoldingId = holdingId;
-
-                return PartialView(model);
-
-        }
-
         //GET: Test Methods - ****For Testing Purposes Only****
 
-        //public ActionResult TestMethods(Guid? holdingId)
+        //public IActionResult TestMethods(Guid? holdingId)
         //{
 
         //    if (holdingId == null)
@@ -227,7 +122,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //POST - Pack Requested
         [HttpPost]        
-        public ActionResult PackRequest(Guid holdingId, string cph)
+        public IActionResult PackRequest(Guid holdingId, string cph)
         {
 
                 packRequestedService.CreatePackRequested(holdingId, cph);
@@ -240,7 +135,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //Update the People database with user's new email
         [HttpPost]
-        public ActionResult PeopleUpdate(Guid holdingId, string UserEmail)
+        public IActionResult PeopleUpdate(Guid holdingId, string UserEmail)
         {
 
                 string userId = userHelper.CurrentUser();
@@ -265,8 +160,14 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //Code to Get the Pack
 
-        public FileResult GetPack(string savePath)
+        public IActionResult GetPack(string savePath)
         {
+
+                // Only packs that were generated by the workbench can be downloaded
+                if (!db.PackRequested.Any(x => x.savePath == savePath))
+                {
+                    return NotFound();
+                }
 
                 byte[] packFile = fileService.StreamFile(savePath);
 
@@ -278,8 +179,14 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //POST: Delete Specific pack
 
-        public ActionResult DeletePack(string savePath, Guid packID)
+        public IActionResult DeletePack(string savePath, Guid packID)
         {
+
+                // Only delete the file recorded against this pack request
+                if (!db.PackRequested.Any(x => x.packRequestedId == packID && x.savePath == savePath))
+                {
+                    return NotFound();
+                }
 
                 packRequestedService.DeletePack(savePath, packID);
 

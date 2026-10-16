@@ -1,5 +1,4 @@
-﻿using RPA.Inspections.Workbench.DAL;
-using RPA.Inspections.Workbench.Factory;
+using RPA.Inspections.Workbench.DAL;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,10 +9,12 @@ namespace RPA.Inspections.Workbench.Helpers
     {
 
         IPeopleContext pdb;
+        IHttpContextAccessor httpContextAccessor;
 
-        public UserHelper(IPeopleContext peopleContext)
+        public UserHelper(IPeopleContext peopleContext, IHttpContextAccessor httpContextAccessor)
         {
             this.pdb = peopleContext;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public string CurrentUser()
@@ -21,7 +22,7 @@ namespace RPA.Inspections.Workbench.Helpers
         {
             string user;
 
-            var context = HttpContextManager.Current;
+            var context = httpContextAccessor.HttpContext;
 
             if (context != null)
             {
@@ -61,12 +62,12 @@ namespace RPA.Inspections.Workbench.Helpers
         {
             string usermail;
 
-            var context = HttpContextManager.Current;
+            var context = httpContextAccessor.HttpContext;
 
             if (context != null)
             {
 
-                usermail = pdb.People.Where(x => x.StaffNumber == user).Select(x => x.Email).FirstOrDefault();
+                usermail = pdb.People.Where(x => x.StaffNumber.ToLower() == user.ToLower()).Select(x => x.Email).FirstOrDefault();
 
                 if (usermail == "rpainternaldevelopmenttest@rpa.gsi.gov.uk")
                 {
@@ -85,12 +86,12 @@ namespace RPA.Inspections.Workbench.Helpers
         {
             string username;
 
-            var context = HttpContextManager.Current;
+            var context = httpContextAccessor.HttpContext;
 
             if (context != null)
             {
 
-                username = pdb.People.Where(x => x.StaffNumber == user).Select(x => x.Name).FirstOrDefault();
+                username = pdb.People.Where(x => x.StaffNumber.ToLower() == user.ToLower()).Select(x => x.Name).FirstOrDefault();
 
             }
             else

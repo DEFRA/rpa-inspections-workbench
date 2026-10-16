@@ -1,9 +1,9 @@
-﻿using RPA.Inspections.Workbench.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using RPA.Inspections.Workbench.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
@@ -11,7 +11,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        public IActionResult Index()
         {
             //Get Main Menu
             

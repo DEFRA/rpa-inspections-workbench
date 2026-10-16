@@ -1,12 +1,12 @@
-﻿
-@model PagedList<RPA.Inspections.Workbench.Models.Holding>
+
+@model X.PagedList.IPagedList<RPA.Inspections.Workbench.Models.Holding>
 
 @{
     ViewBag.Title = "HoldingList";
 }
 
-@using PagedList.Mvc;
-@using PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 <h2>Holding List</h2>
 <div>
@@ -89,6 +89,6 @@
 
 
 <div class="float-left clear-left">
-    @Html.PagedListPager(Model, page => Url.Action("HoldingList", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    @Html.PagedListPager(Model, page => Url.Action("HoldingList", new { searchData = (string)ViewBag.searchData, page, pageSize = Model.PageSize }))
     Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Holdings
 </div>

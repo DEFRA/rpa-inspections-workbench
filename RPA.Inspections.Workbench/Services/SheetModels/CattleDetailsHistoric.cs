@@ -1,16 +1,14 @@
-﻿using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.SL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.Services.SheetModels
 {
 
     public class CattleDetailsHistoric
     {
-        IHolidayService holidayService;
         public string earTag { get; set; }
         public string breed { get; set; }
         public string gender { get; set; }

@@ -1,4 +1,4 @@
-﻿
+
 using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
@@ -11,7 +11,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Tests.SL
 {

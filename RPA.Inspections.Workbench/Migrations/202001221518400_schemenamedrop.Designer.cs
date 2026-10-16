@@ -7,9 +7,9 @@ namespace RPA.Inspections.Workbench.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class schemenamedrop : IMigrationMetadata
+    public sealed partial class Schemenamedrop : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(schemenamedrop));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Schemenamedrop));
         
         string IMigrationMetadata.Id
         {

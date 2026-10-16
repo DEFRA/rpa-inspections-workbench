@@ -1,7 +1,6 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
-using RPA.Inspections.Workbench.Factory;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.SL;
@@ -23,7 +22,6 @@ namespace RPA.Inspections.Workbench.Tests.SL
         MockWorkbenchContext context;
         MockPeopleContext peopleContext;
 
-        IFileService fileService;
         IHoldingService holdingService;
         IFilterService filterService;
         IUserHelper userHelper;
@@ -35,11 +33,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
             filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
-            userHelper = new UserHelper(peopleContext.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
             holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
-
-
-            HttpContextManager.SetCurrentContext(MockHttpContext.GetMockedHttpContext());
         }
 
         [Test]

@@ -1,18 +1,23 @@
-﻿using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.DAL
 {
     [ExcludeFromCodeCoverage]
+    [DbConfigurationType(typeof(WorkbenchDbConfiguration))]
     public class WorkbenchContext : DbContext, IWorkbenchContext
     {
-
+        // Required by DbMigrator, which creates the context itself; the migration configuration supplies the real connection.
         public WorkbenchContext() : base("WorkbenchContext")
+        {
+            this.Configuration.AutoDetectChangesEnabled = false;
+        }
+
+        public WorkbenchContext(string nameOrConnectionString) : base(nameOrConnectionString)
         {
             this.Configuration.AutoDetectChangesEnabled = false;
         }

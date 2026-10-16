@@ -1,4 +1,4 @@
-﻿
+
 using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
@@ -7,6 +7,7 @@ using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services;
 using RPA.Inspections.Workbench.SL;
 using RPA.Inspections.Workbench.Tests.DAL.Mock;
+using RPA.Inspections.Workbench.Tests.Factory;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -39,7 +40,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
             peopleContext = new MockPeopleContext();
             mailService = new Mock<IMailService>();
             sendService = new Mock<ISendService>();
-            userHelper = new UserHelper(peopleContext.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
 
             packService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
         }

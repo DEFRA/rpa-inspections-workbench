@@ -1,4 +1,4 @@
-﻿using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -6,18 +6,17 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {
     public interface IFileService
     {
 
-        void RunAddList(HttpPostedFileBase bulkSource, bool deleteAll);
+        void RunAddList(IFormFile bulkSource, bool deleteAll);
 
         void AddToHolding(DataRow row);
 
-        DataTable BulkData(HttpPostedFileBase bulkSource);
+        DataTable BulkData(IFormFile bulkSource);
 
         void ClearTables();
 

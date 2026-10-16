@@ -1,10 +1,10 @@
-﻿using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PagedList;
+using X.PagedList;
 
 namespace RPA.Inspections.Workbench.SL
 {

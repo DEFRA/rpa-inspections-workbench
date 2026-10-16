@@ -1,11 +1,10 @@
-﻿using RPA.Inspections.Workbench.DAL;
+using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {

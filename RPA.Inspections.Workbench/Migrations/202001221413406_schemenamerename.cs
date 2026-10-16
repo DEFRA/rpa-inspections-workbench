@@ -5,7 +5,7 @@ namespace RPA.Inspections.Workbench.Migrations
     using System.Diagnostics.CodeAnalysis;
 
     [ExcludeFromCodeCoverage]
-    public partial class schemenamerename : DbMigration
+    public partial class Schemenamerename : DbMigration
     {
         public override void Up()
         {

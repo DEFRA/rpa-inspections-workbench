@@ -1,4 +1,4 @@
-﻿@model List<RPA.Inspections.Workbench.Models.PackRequested>
+@model List<RPA.Inspections.Workbench.Models.PackRequested>
 
 
 @{
@@ -55,7 +55,5 @@
 </table>
 
 <div>
-    @{
-        Html.RenderAction("_GeneratedPacks", "Holding");
-    }
+    @await Component.InvokeAsync("GeneratedPacks")
 </div>

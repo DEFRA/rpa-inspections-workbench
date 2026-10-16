@@ -1,9 +1,9 @@
-﻿namespace RPA.Inspections.Workbench.Migrations
+namespace RPA.Inspections.Workbench.Migrations
 {
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class changestaffregex : DbMigration
+    public partial class Changestaffregex : DbMigration
     {
         public override void Up()
         {

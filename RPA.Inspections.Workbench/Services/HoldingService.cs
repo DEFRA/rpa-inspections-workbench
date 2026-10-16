@@ -1,4 +1,4 @@
-﻿using PagedList;
+using X.PagedList;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Extensions;
 using RPA.Inspections.Workbench.Helpers;
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {

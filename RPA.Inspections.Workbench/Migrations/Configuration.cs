@@ -14,6 +14,11 @@ namespace RPA.Inspections.Workbench.Migrations
             AutomaticMigrationsEnabled = false;
         }
 
+        public Configuration(string connectionString) : this()
+        {
+            TargetDatabase = new System.Data.Entity.Infrastructure.DbConnectionInfo(connectionString, "System.Data.SqlClient");
+        }
+
         protected override void Seed(RPA.Inspections.Workbench.DAL.WorkbenchContext context)
         {
             //  This method will be called after migrating to the latest version.

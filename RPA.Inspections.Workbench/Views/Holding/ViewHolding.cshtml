@@ -1,4 +1,4 @@
-﻿
+
 @model RPA.Inspections.Workbench.Models.Holding
 
 @{
@@ -21,9 +21,7 @@ else
 <hr />
 
                 
-@{
-    Html.RenderAction("_ViewLinkedHoldings", "Holding", new { holdingId = Model.holdingId });
-}
+@await Component.InvokeAsync("ViewLinkedHoldings", new { holdingId = Model.holdingId })
 
     @Html.AntiForgeryToken()
 
@@ -75,9 +73,7 @@ else
                 @Html.LabelFor(model => model.animalsToBeInspected) :
             </td>
             <td>
-                @{
-                    Html.RenderAction("_CountCattle", "Holding", new { holdingId = Model.holdingId });
-                }
+                @await Component.InvokeAsync("CountCattle", new { holdingId = Model.holdingId })
             </td>
         </tr>
 
@@ -187,9 +183,7 @@ else
                     @Html.DisplayFor(model => model.mobileNumber)
                 }
             </td>
-            @{
-                Html.RenderAction("_ViewPackRequested", "Holding", new { holdingId = Model.holdingId });
-            }
+            @await Component.InvokeAsync("ViewPackRequested", new { holdingId = Model.holdingId })
         </tr>
 
         @Html.HiddenFor(model => model.primaryName)
@@ -224,15 +218,11 @@ else
     <div class="partial-view-container fade active in tab-pane" id="animals">
         <h5 style="text-align:center; padding-top:1em">Cattle List</h5>
         
-        @{
-            Html.RenderAction("_ViewCattle", "Holding", new { holdingId = Model.holdingId });
-        }
+        @await Component.InvokeAsync("ViewCattle", new { holdingId = Model.holdingId })
     </div>
     <div class="partial-view-container tab-pane fade" id="late">
         <h5 style="text-align:center; padding-top:1em">Late List</h5>
-        @{
-            Html.RenderAction("_LateCattle", "Holding", new { holdingId = Model.holdingId });
-        }
+        @await Component.InvokeAsync("LateCattle", new { holdingId = Model.holdingId })
     </div>
 </div>
 

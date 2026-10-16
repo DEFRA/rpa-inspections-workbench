@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.Controllers;
 using RPA.Inspections.Workbench.DAL;
@@ -10,7 +10,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Tests.Controllers
 {
@@ -66,10 +66,18 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         public void Test_OpenReport_Returns_Value()
         {
 
-            var result = controller.open_report("test");
+            var result = controller.open_report("test1");
 
-            Assert.AreEqual("test", ((FilePathResult)result).FileName);
-            Assert.AreEqual("text/html", ((FilePathResult)result).ContentType);
+            Assert.AreEqual("test1", ((PhysicalFileResult)result).FileName);
+            Assert.AreEqual("text/html", ((PhysicalFileResult)result).ContentType);
+        }
+
+        [Test]
+        public void Test_OpenReport_Rejects_Paths_That_Are_Not_Bcms_Reports()
+        {
+            var result = controller.open_report("C:\\Windows\\win.ini");
+
+            Assert.IsInstanceOf<NotFoundResult>(result);
         }
     }
 }

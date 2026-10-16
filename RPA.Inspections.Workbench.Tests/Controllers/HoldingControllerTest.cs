@@ -1,8 +1,8 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
-using PagedList;
+using X.PagedList;
 using RPA.Inspections.Workbench.Controllers;
-using RPA.Inspections.Workbench.Factory;
+using RPA.Inspections.Workbench.ViewComponents;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services;
@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Tests.Controllers
 {
@@ -44,7 +44,7 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
 
-            userHelper = new UserHelper(peopleContext.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
             filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
             holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
             linkedHoldingService = new LinkedHoldingService(context.MockContext.Object);
@@ -54,8 +54,6 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             mailService = new Mock<IMailService>();
             holidayService = new Mock<IHolidayService>();
             packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
-
-            HttpContextManager.SetCurrentContext(MockHttpContext.GetMockedHttpContext());
 
             controller = new HoldingController(context.MockContext.Object, peopleContext.MockContext.Object, holdingService, linkedHoldingService, cattleService, packRequestedService, mailService.Object, fileService.Object, filterService, userHelper, sendService.Object, holidayService.Object);
 
@@ -95,9 +93,9 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
         public void Test_GeneratedPacks_Returns_GeneratedPacks()
         {
-            var result = controller._GeneratedPacks() as PartialViewResult;
+            var result = new GeneratedPacksViewComponent(packRequestedService).WithViewContext().Invoke();
 
-            Assert.AreEqual(3, ((List<PackRequested>)result.ViewData.Model).Count);
+            Assert.AreEqual(3, result.ModelOf<List<PackRequested>>().Count);
 
         }
 
@@ -116,45 +114,45 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
         public void Test_ViewLinkedHoldings_Displays_LinkedHolding()
         {
-            var result = controller._ViewLinkedHoldings(Guid.Parse("D0F53C5B-9717-48B1-A40F-0044003DDC14")) as PartialViewResult;
+            var result = new ViewLinkedHoldingsViewComponent(linkedHoldingService).WithViewContext().Invoke(Guid.Parse("D0F53C5B-9717-48B1-A40F-0044003DDC14"));
 
-            Assert.AreEqual(1, ((List<LinkedHolding>)result.ViewData.Model).Count);
+            Assert.AreEqual(1, result.ModelOf<List<LinkedHolding>>().Count);
         }
 
         [Test]
 
         public void Test_ViewCattle_Displays_Cattle()
         {
-            var result = controller._ViewCattle(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")) as PartialViewResult;
+            var result = new ViewCattleViewComponent(cattleService).WithViewContext().Invoke(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70"));
 
-            Assert.AreEqual(4, ((List<Cattle>)result.ViewData.Model).Count);
+            Assert.AreEqual(4, result.ModelOf<List<Cattle>>().Count);
         }
 
         [Test]
 
         public void Test_LateCattle_Displays_Cattle()
         {
-            var result = controller._LateCattle(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")) as PartialViewResult;
+            var result = new LateCattleViewComponent(cattleService).WithViewContext().Invoke(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70"));
 
-            Assert.AreEqual(2, ((List<Cattle>)result.ViewData.Model).Count);
+            Assert.AreEqual(2, result.ModelOf<List<Cattle>>().Count);
         }
 
         [Test]
 
         public void Test_CountCattle_Displays_Cattle()
         {
-            var result = controller._CountCattle(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")) as PartialViewResult;
+            var result = new CountCattleViewComponent(cattleService).WithViewContext().Invoke(Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70"));
 
-            Assert.AreEqual(4, ((List<Cattle>)result.ViewData.Model).Count);
+            Assert.AreEqual(4, result.ModelOf<List<Cattle>>().Count);
         }
 
         [Test]
 
         public void Test_ViewPackRequested_ViewsPack()
         {
-            var result = controller._ViewPackRequested(Guid.Parse("A6EFE560-FE03-40A2-94CF-00368986EDE2")) as PartialViewResult;
+            var result = new ViewPackRequestedViewComponent(packRequestedService).WithViewContext().Invoke(Guid.Parse("A6EFE560-FE03-40A2-94CF-00368986EDE2"));
 
-            Assert.AreEqual(true, ((PackRequested)result.ViewData.Model).activeRequest);
+            Assert.AreEqual(true, result.ModelOf<PackRequested>().activeRequest);
         }
 
         [Test]
@@ -180,9 +178,9 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
         public void Test_DeletePack_DeletesPack()
         {
-            var result = controller.DeletePack("TestPath", Guid.Parse("0C51DC76-B92D-420A-BA5F-006E564C06ED")) as RedirectToRouteResult;
+            var result = controller.DeletePack("TestPath", Guid.Parse("0C51DC76-B92D-420A-BA5F-006E564C06ED")) as RedirectToActionResult;
 
-            Assert.AreEqual("PacksRequested", result.RouteValues["Action"]);
+            Assert.AreEqual("PacksRequested", result.ActionName);
             context.MockContext.Verify(x => x.SaveChanges(), Times.AtLeastOnce());
         }
 
@@ -194,6 +192,18 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
             Assert.AreEqual("test", ((FileContentResult)result).FileDownloadName);
             Assert.AreEqual("application/octet-stream", ((FileContentResult)result).ContentType);
+        }
+
+        [Test]
+        public void Test_GetPack_Rejects_Paths_That_Are_Not_Generated_Packs()
+        {
+            Assert.IsInstanceOf<NotFoundResult>(controller.GetPack("C:\\Windows\\win.ini"));
+        }
+
+        [Test]
+        public void Test_DeletePack_Rejects_Paths_That_Do_Not_Belong_To_The_Pack()
+        {
+            Assert.IsInstanceOf<NotFoundResult>(controller.DeletePack("C:\\Windows\\win.ini", Guid.Parse("0C51DC76-B92D-420A-BA5F-006E564C06ED")));
         }
     }
 }

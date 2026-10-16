@@ -9,10 +9,11 @@ namespace RPA.Inspections.Workbench
     using RPA.Inspections.Workbench.Models;
 
     [ExcludeFromCodeCoverage]
+    [DbConfigurationType(typeof(WorkbenchDbConfiguration))]
     public partial class PeopleContext : DbContext, IPeopleContext
     {
-        public PeopleContext()
-            : base("name=PeopleContext")
+        public PeopleContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
         {
         }
 

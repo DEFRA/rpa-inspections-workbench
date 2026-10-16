@@ -1,4 +1,5 @@
-﻿using PagedList;
+using Microsoft.AspNetCore.Authorization;
+using X.PagedList;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
@@ -8,8 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
@@ -33,23 +34,6 @@ namespace RPA.Inspections.Workbench.Controllers
         IHolidayService holidayService;
 
 
-        public AdminController()
-        {
-
-            db = new WorkbenchContext();
-            Pdb = new PeopleContext();
-            userHelper = new UserHelper(Pdb);
-            filterService = new FilterService(db, Pdb);
-            holdingService = new HoldingService(db, Pdb, filterService, userHelper);
-            cattleService = new CattleService(db);
-            sendService = new SendService();
-            breedService = new BreedService(db);
-            mailService = new MailService(db);
-            packService = new PackRequestedService(db, mailService, userHelper, sendService);
-            holidayService = new HolidayService();
-            fileService = new FileService(db, cattleService, holdingService, sendService, mailService, holidayService);
-        }
-
         public AdminController(IWorkbenchContext db, IPeopleContext Pdb, IHoldingService holdingService, ICattleService cattleService, IBreedService breedService, IPackRequested packService, IMailService mailService, IFileService fileService, IFilterService filterService, IUserHelper userHelper, ISendService sendService, IHolidayService holidayService)
         {
             this.db = db;
@@ -67,14 +51,14 @@ namespace RPA.Inspections.Workbench.Controllers
         }
 
         // GET: Admin Main Page
-        public ActionResult Index()
+        public IActionResult Index()
         {
             return View();
         }
 
         //GET: List of all breeds
 
-        public ActionResult BreedList(string searchstring = null, int page = 1, int pageSize = 50)
+        public IActionResult BreedList(string searchstring = null, int page = 1, int pageSize = 50)
 
         {
 
@@ -88,7 +72,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: add a new breed
 
-        public ActionResult AddBreed()
+        public IActionResult AddBreed()
         {
 
                 Breed model = new Breed();
@@ -99,7 +83,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: view specific breed to edit
 
-        public ActionResult ViewBreed(Guid breedId)
+        public IActionResult ViewBreed(Guid breedId)
         {
 
                 Breed model = breedService.GetBreedById(breedId);
@@ -113,7 +97,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: List of all holdings
 
-        public ActionResult HoldingList(string searchstring = null, int page = 1, int pageSize = 50)
+        public IActionResult HoldingList(string searchstring = null, int page = 1, int pageSize = 50)
         {
 
                 var model = holdingService.GetAllHolding(searchstring, page, pageSize);
@@ -125,7 +109,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: add a new holding
 
-        public ActionResult AddHolding()
+        public IActionResult AddHolding()
         {
 
                 Holding holding = new Holding();
@@ -138,7 +122,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: view specific holding to edit
 
-        public ActionResult ViewHolding(Guid HoldingId)
+        public IActionResult ViewHolding(Guid HoldingId)
         {
 
 
@@ -152,7 +136,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         }
 
-        public ActionResult ArchiveAdmin()
+        public IActionResult ArchiveAdmin()
         {
 
             return View();
@@ -160,7 +144,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: List of all archived holdings
 
-        public ActionResult ArchivedList(string searchstring = null, string searchYear = null)
+        public IActionResult ArchivedList(string searchstring = null, string searchYear = null)
         {
                 List<string> archivedYears = db.Control.Where(x => x.Property == "SchemeYr" && x.Active == false).OrderBy(c => c.Value).Select(y => y.Value).ToList();
 
@@ -175,7 +159,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         //GET: view specific holding
 
-        public ActionResult ViewArchivedHolding(Guid HoldingId)
+        public IActionResult ViewArchivedHolding(Guid HoldingId)
         {
 
 
@@ -186,14 +170,14 @@ namespace RPA.Inspections.Workbench.Controllers
                 return View(model);
         }
 
-        public ActionResult InspectorList()
+        public IActionResult InspectorList()
         {
             List <Inspector> inspectorList = db.Inspector.ToList();
 
             return View(inspectorList);
         }
 
-        public ActionResult AddInspector()
+        public IActionResult AddInspector()
         {
 
             Inspector inspector = new Inspector();
@@ -204,7 +188,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddInspector(Inspector inspector)
+        public IActionResult AddInspector(Inspector inspector)
         {
             if (ModelState.IsValid)
             {
@@ -225,7 +209,7 @@ namespace RPA.Inspections.Workbench.Controllers
             }
         }
 
-        public ActionResult RemoveInspector(Guid inspectorId)
+        public IActionResult RemoveInspector(Guid inspectorId)
         {
 
             Inspector inspector = db.Inspector.Where(x => x.inspectorId == inspectorId).FirstOrDefault();
@@ -241,7 +225,7 @@ namespace RPA.Inspections.Workbench.Controllers
         //POST: Save Changes to Breed (create)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddBreed(Breed breed)
+        public IActionResult AddBreed(Breed breed)
         {
 
             db.Breed.Add(breed);
@@ -255,7 +239,7 @@ namespace RPA.Inspections.Workbench.Controllers
         //POST: Save Changes to Breed (edit)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ViewBreed(Breed breed)
+        public IActionResult ViewBreed(Breed breed)
         {
 
                 if (ModelState.IsValid)
@@ -276,7 +260,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Index(HttpPostedFileBase bulkSource, bool deleteAll)
+        public IActionResult Index(IFormFile bulkSource, bool deleteAll)
         {
             try
             {
@@ -297,7 +281,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AddHolding(Holding holding)
+        public IActionResult AddHolding(Holding holding)
         {
             if (ModelState.IsValid)
             {
@@ -328,7 +312,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ViewHolding(Holding holding)
+        public IActionResult ViewHolding(Holding holding)
         {
 
 
@@ -364,7 +348,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         }
 
-        public ActionResult SchemeYearAdmin()
+        public IActionResult SchemeYearAdmin()
         {
             List<Control> SchemeYears = db.Control.Where(x => x.Property == "SchemeYr").OrderByDescending(p => p.Value).ToList();
 
@@ -373,7 +357,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SchemeYearAdmin(List<Control> controls)
+        public IActionResult SchemeYearAdmin(List<Control> controls)
         {
             foreach (var ctrl in controls)
             {
@@ -396,7 +380,7 @@ namespace RPA.Inspections.Workbench.Controllers
         }
 
 
-        public ActionResult AddSchemeYear()
+        public IActionResult AddSchemeYear()
         {
             string lastSchemeYear = db.Control.Where(x => x.Property == "SchemeYr").OrderByDescending(p => p.Value).Select(c => c.Value).FirstOrDefault();
 
@@ -447,7 +431,7 @@ namespace RPA.Inspections.Workbench.Controllers
 
             var response = model.Select(x => new { label = x.Name, value = x.StaffNumber }).ToList();
 
-            return Json(response, JsonRequestBehavior.AllowGet);
+            return Json(response);
         }
 
 

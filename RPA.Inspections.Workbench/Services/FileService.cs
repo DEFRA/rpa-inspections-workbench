@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
@@ -13,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {
@@ -42,7 +41,7 @@ namespace RPA.Inspections.Workbench.SL
 
         //Run all Processes to Add new Inspection List
 
-        public void RunAddList(HttpPostedFileBase bulkSource, bool deleteAll)
+        public void RunAddList(IFormFile bulkSource, bool deleteAll)
         {
             if (deleteAll == true)
             {
@@ -167,10 +166,13 @@ namespace RPA.Inspections.Workbench.SL
 
         //Accept a New Inspection List File
 
-        public DataTable BulkData(HttpPostedFileBase bulkSource)
+        public DataTable BulkData(IFormFile bulkSource)
         {
             string filepath = PathBuilder(Path.GetFileName(bulkSource.FileName));
-            bulkSource.SaveAs(filepath);
+            using (var upload = new FileStream(filepath, FileMode.Create))
+            {
+                bulkSource.CopyTo(upload);
+            }
 
             DataTable BulkSource = new DataTable("BulkSource");
 
@@ -272,14 +274,7 @@ namespace RPA.Inspections.Workbench.SL
 
         public byte[] StreamFile(string savepath)
         {
-            FileStream fs = new FileStream(savepath, FileMode.Open, FileAccess.Read);
-
-            byte[] packFile = new byte[fs.Length];
-
-            fs.Read(packFile, 0, System.Convert.ToInt32(fs.Length));
-
-            fs.Close();
-            return packFile;
+            return File.ReadAllBytes(savepath);
         }
 
 

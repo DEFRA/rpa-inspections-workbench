@@ -1,8 +1,9 @@
-﻿using RPA.Inspections.Workbench.Attributes;
+using RPA.Inspections.Workbench.Attributes;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace RPA.Inspections.Workbench.Models
 {
@@ -103,6 +104,8 @@ namespace RPA.Inspections.Workbench.Models
 
         public virtual SchemeNameDrop SchemeNameDrop { get; set; }
 
+        // Calculated from other fields, so it must not take part in model validation
+        [ValidateNever]
         [Display(Name = "Scheme Year")]
         public string schemeYearOnly
         {
@@ -112,6 +115,7 @@ namespace RPA.Inspections.Workbench.Models
             }
         }
 
+        [ValidateNever]
         [Display(Name = "Scheme Name Year Only")]
         public string schemeNameYearOnly
         {

@@ -1,10 +1,9 @@
-﻿using RPA.Inspections.Workbench.DAL;
+using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Extensions;
 using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace RPA.Inspections.Workbench.SL
 {
@@ -14,12 +13,6 @@ namespace RPA.Inspections.Workbench.SL
         IPeopleContext Pdb;
 
 
-
-        public FilterService()
-        {
-            this.db = new WorkbenchContext();
-            this.Pdb = new PeopleContext();
-        }
 
         public FilterService(IWorkbenchContext context, IPeopleContext Pcontext)
         {

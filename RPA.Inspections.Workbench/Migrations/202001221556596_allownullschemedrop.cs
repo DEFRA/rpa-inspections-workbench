@@ -5,7 +5,7 @@ namespace RPA.Inspections.Workbench.Migrations
     using System.Diagnostics.CodeAnalysis;
 
     [ExcludeFromCodeCoverage]
-    public partial class allownullschemedrop : DbMigration
+    public partial class Allownullschemedrop : DbMigration
     {
         public override void Up()
         {
