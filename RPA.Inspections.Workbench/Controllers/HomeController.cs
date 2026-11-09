@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
-    [Authorize(Roles = "CI Inspections Workbench: Basic Access")]
+    [Authorize(Policy = RPA.Inspections.Workbench.Services.ApplicationServices.BasicAccessPolicy)]
 
     public class HomeController : Controller
     {

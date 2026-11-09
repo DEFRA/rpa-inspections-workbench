@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
-    [Authorize(Roles = "CI Inspections Workbench: BCMS Sev Calc Generator")]
+    [Authorize(Policy = ApplicationServices.BcmsPolicy)]
 
     public class BcmsAdminController : Controller
     {

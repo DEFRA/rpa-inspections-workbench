@@ -36,7 +36,7 @@
     </div>
 
     <br />
-    @if (User.IsInRole("CI Inspections Workbench: Super User"))
+    @if ((await Authorization.AuthorizeAsync(User, RPA.Inspections.Workbench.Services.ApplicationServices.SuperUserPolicy)).Succeeded)
     {
 
         using (Html.BeginForm("Index", "Admin", FormMethod.Post, new { enctype = "multipart/form-data", @id = "frmBulk" }))

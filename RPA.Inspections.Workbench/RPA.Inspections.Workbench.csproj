@@ -12,7 +12,9 @@
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.5.2" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
+    <!-- Pin the patched version rather than Identity.Web's vulnerable transitive minimum. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <PackageReference Include="X.PagedList.Mvc.Core" Version="10.6.0" />
   </ItemGroup>
 
@@ -38,5 +40,3 @@
   </ItemGroup>
 
 </Project>
-
-

@@ -27,7 +27,7 @@
         <p>View Your Animal Data Pack Requests</p>
     </div>
 
-    @if (User.IsInRole("CI Inspections Workbench: Admin User"))
+    @if ((await Authorization.AuthorizeAsync(User, RPA.Inspections.Workbench.Services.ApplicationServices.AdminPolicy)).Succeeded)
     {
         <div class="float-left clear-both">
 
@@ -37,7 +37,7 @@
         </div>
     }
 
-    @if (User.IsInRole("CI Inspections Workbench: BCMS Sev Calc Generator"))
+    @if ((await Authorization.AuthorizeAsync(User, RPA.Inspections.Workbench.Services.ApplicationServices.BcmsPolicy)).Succeeded)
     {
         <div class="float-left clear-both">
 

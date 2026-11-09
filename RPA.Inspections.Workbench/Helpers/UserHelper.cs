@@ -1,7 +1,8 @@
 using RPA.Inspections.Workbench.DAL;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Security.Claims;
+using RPA.Inspections.Workbench.Services;
 
 namespace RPA.Inspections.Workbench.Helpers
 {
@@ -26,11 +27,7 @@ namespace RPA.Inspections.Workbench.Helpers
 
             if (context != null)
             {
-                user = context.User.Identity.Name.ToLower()
-                   .Replace("earth\\mo", "earth\\m")
-                   .Replace("demeter\\mo", "demeter\\m");
-                   
-                user = Regex.Replace(user, @".*\\", "");
+                user = AuditIdentity.GetName(context.User, (context.User.Identity as ClaimsIdentity)?.NameClaimType);
             }
             else
             {

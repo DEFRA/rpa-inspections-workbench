@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
-    [Authorize(Roles = "CI Inspections Workbench: Admin User")]
+    [Authorize(Policy = ApplicationServices.AdminPolicy)]
 
     public class AdminController : Controller
     {
@@ -254,7 +254,7 @@ namespace RPA.Inspections.Workbench.Controllers
             return View(breed);
         }
 
-        [Authorize(Roles = "CI Inspections Workbench: Super User")]
+        [Authorize(Policy = ApplicationServices.SuperUserPolicy)]
 
         //POST: Add a New Inspection List
 
