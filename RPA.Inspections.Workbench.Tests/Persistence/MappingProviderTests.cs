@@ -1,6 +1,6 @@
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO.Compression;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Hosting;

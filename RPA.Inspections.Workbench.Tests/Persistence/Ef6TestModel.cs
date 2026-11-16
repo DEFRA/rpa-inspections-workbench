@@ -1,6 +1,7 @@
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
-using System.Data.SqlClient;
+using System.Data.Entity.SqlServer;
+using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
@@ -51,7 +52,7 @@ internal static class Ef6TestModel
         // Use the production mapping hook, but supply a manifest token so model building never opens SQL.
         typeof(T).GetMethod("OnModelCreating", BindingFlags.Instance | BindingFlags.NonPublic)
             .Invoke(context, new object[] { builder });
-        return builder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
+        return builder.Build(new DbProviderInfo(MicrosoftSqlProviderServices.ProviderInvariantName, "2012"));
     }
 
     internal static void DetachAll(this DbContext context)

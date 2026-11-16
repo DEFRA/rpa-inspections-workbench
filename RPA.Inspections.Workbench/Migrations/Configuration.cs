@@ -3,6 +3,7 @@ namespace RPA.Inspections.Workbench.Migrations
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
+    using System.Data.Entity.SqlServer;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
@@ -16,7 +17,7 @@ namespace RPA.Inspections.Workbench.Migrations
 
         public Configuration(string connectionString) : this()
         {
-            TargetDatabase = new System.Data.Entity.Infrastructure.DbConnectionInfo(connectionString, "System.Data.SqlClient");
+            TargetDatabase = new System.Data.Entity.Infrastructure.DbConnectionInfo(connectionString, MicrosoftSqlProviderServices.ProviderInvariantName);
         }
 
         protected override void Seed(RPA.Inspections.Workbench.DAL.WorkbenchContext context)

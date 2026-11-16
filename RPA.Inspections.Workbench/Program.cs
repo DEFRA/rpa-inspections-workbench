@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using RPA.Inspections.Workbench.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Configuration.AddWorkbenchKeyVault(builder.Environment);
 builder.Services.AddWorkbenchApplication(builder.Configuration);
 
 var app = builder.Build();
+app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {
@@ -24,7 +26,10 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Platform probes use HTTP even when the ingress terminates TLS. All application
+// routes retain HTTPS redirection and secure authentication cookies.
+app.UseWhen(context => context.Request.Path != "/health/live" && context.Request.Path != "/health/ready",
+    application => application.UseHttpsRedirection());
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .SetDefaultCulture("en-GB")
     .AddSupportedCultures("en-GB")
@@ -34,6 +39,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") })
+    .AllowAnonymous();
 
 app.MapControllerRoute(
     name: "Default",

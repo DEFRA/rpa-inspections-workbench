@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.Identity.Web;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
@@ -26,6 +26,7 @@ public static class ApplicationServices
         var settings = ValidateConfiguration(configuration, environment);
 
         services.Configure<AuditIdentityOptions>(options => options.AuditNameClaimType = settings.AuditClaim);
+        services.AddWorkbenchForwarding(configuration);
         services.AddWorkbenchBlobStorage(configuration);
         services.AddWorkbenchDataProtection(configuration);
         
@@ -250,7 +251,7 @@ public static class ApplicationServices
         }
         catch (ArgumentException)
         {
-            throw new InvalidOperationException($"{key} is not a valid System.Data.SqlClient connection string.");
+            throw new InvalidOperationException($"{key} is not a valid SQL Server connection string.");
         }
     }
 
