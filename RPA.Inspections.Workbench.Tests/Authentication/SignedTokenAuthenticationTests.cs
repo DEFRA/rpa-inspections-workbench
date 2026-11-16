@@ -116,7 +116,7 @@ public class SignedTokenAuthenticationTests
             Assert.That(context.Principal.IsInRole("Workbench.Basic"), Is.True);
             Assert.That(context.Principal.HasClaim(c => c.Type == ClaimTypes.Role), Is.False);
             Assert.That(context.Principal.Identity.Name, Is.EqualTo("EARTH\\MO600300"));
-            Assert.That(AuditIdentity.GetName(context.Principal, "staff_number"), Is.EqualTo("m600300"));
+            Assert.That(ApplicationServices.GetAuditName(context.Principal, "staff_number"), Is.EqualTo("m600300"));
         }
     }
 

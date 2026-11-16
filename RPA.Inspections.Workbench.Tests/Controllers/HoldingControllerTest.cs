@@ -53,7 +53,8 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             fileService = new Mock<IFileService>();
             mailService = new Mock<IMailService>();
             holidayService = new Mock<IHolidayService>();
-            packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
+            packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object, Mock.Of<IFileStorage>());
+            fileService.Setup(x => x.StreamFile(It.IsAny<string>())).Returns(() => new MemoryStream(new byte[] { 1, 2, 3 }));
 
             controller = new HoldingController(context.MockContext.Object, peopleContext.MockContext.Object, holdingService, linkedHoldingService, cattleService, packRequestedService, mailService.Object, fileService.Object, filterService, userHelper, sendService.Object, holidayService.Object);
 
@@ -190,14 +191,33 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         {
             var result = controller.GetPack("test");
 
-            Assert.AreEqual("test", ((FileContentResult)result).FileDownloadName);
-            Assert.AreEqual("application/octet-stream", ((FileContentResult)result).ContentType);
+            using var stream = ((FileStreamResult)result).FileStream;
+            Assert.AreEqual("test", ((FileStreamResult)result).FileDownloadName);
+            Assert.AreEqual("application/octet-stream", ((FileStreamResult)result).ContentType);
         }
 
         [Test]
         public void Test_GetPack_Rejects_Paths_That_Are_Not_Generated_Packs()
         {
             Assert.IsInstanceOf<NotFoundResult>(controller.GetPack("C:\\Windows\\win.ini"));
+            fileService.Verify(value => value.StreamFile(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public void MissingBlobForRecordedPackReturnsNotFound()
+        {
+            fileService.Setup(value => value.StreamFile("test")).Throws(new FileNotFoundException());
+            Assert.That(controller.GetPack("test"), Is.TypeOf<NotFoundResult>());
+        }
+
+        [Test]
+        public void BlobPackDownloadPreservesFriendlyFilename()
+        {
+            var record = context.MockPackRequested.Object.First(x => x.savePath == "test");
+            record.savePath = "packs/request/generated/CII Animal Data Spreadsheet123456789.xlsm";
+            var result = (FileStreamResult)controller.GetPack(record.savePath);
+            using var stream = result.FileStream;
+            Assert.That(result.FileDownloadName, Is.EqualTo("CII Animal Data Spreadsheet123456789.xlsm"));
         }
 
         [Test]

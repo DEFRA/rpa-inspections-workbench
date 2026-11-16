@@ -27,7 +27,7 @@ namespace RPA.Inspections.Workbench.Helpers
 
             if (context != null)
             {
-                user = AuditIdentity.GetName(context.User, (context.User.Identity as ClaimsIdentity)?.NameClaimType);
+                user = ApplicationServices.GetAuditName(context.User, (context.User.Identity as ClaimsIdentity)?.NameClaimType);
             }
             else
             {

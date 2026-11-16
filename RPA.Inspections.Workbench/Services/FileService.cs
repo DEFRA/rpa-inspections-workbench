@@ -27,9 +27,10 @@ namespace RPA.Inspections.Workbench.SL
         IMailService mailService;
         ISendService sendService;
         IHolidayService holidayService;
+        IFileStorage fileStorage;
 
 
-        public FileService(IWorkbenchContext context, ICattleService cattleService, IHoldingService holdingService, ISendService sendService, IMailService mailService, IHolidayService holidayService)
+        public FileService(IWorkbenchContext context, ICattleService cattleService, IHoldingService holdingService, ISendService sendService, IMailService mailService, IHolidayService holidayService, IFileStorage fileStorage)
         {
             this.db = context;
             this.cattleService = cattleService;
@@ -37,6 +38,7 @@ namespace RPA.Inspections.Workbench.SL
             this.sendService = sendService;
             this.mailService = mailService;
             this.holidayService = holidayService;
+            this.fileStorage = fileStorage;
         }
 
         //Run all Processes to Add new Inspection List
@@ -168,19 +170,15 @@ namespace RPA.Inspections.Workbench.SL
 
         public DataTable BulkData(IFormFile bulkSource)
         {
-            string filepath = PathBuilder(Path.GetFileName(bulkSource.FileName));
-            using (var upload = new FileStream(filepath, FileMode.Create))
-            {
-                bulkSource.CopyTo(upload);
-            }
+            using var upload = new MemoryStream();
+            bulkSource.CopyTo(upload);
+            upload.Position = 0;
 
             DataTable BulkSource = new DataTable("BulkSource");
 
             bool firstRowIsHeader = true;
 
-            FileInfo existingFile = new FileInfo(filepath);
-
-            ExcelPackage ePack = new ExcelPackage(existingFile);
+            using var ePack = new ExcelPackage(upload);
             ExcelWorksheet ws = ePack.Workbook.Worksheets.First();
 
             for (int xx = 1; xx <= ws.Dimension.End.Column; xx++)
@@ -215,8 +213,6 @@ namespace RPA.Inspections.Workbench.SL
                     rw[excelCol - 1] = data;
                 }
             }
-
-            File.Delete(filepath);
 
             return BulkSource;
         }
@@ -272,9 +268,9 @@ namespace RPA.Inspections.Workbench.SL
 
         // Read File from Location
 
-        public byte[] StreamFile(string savepath)
+        public Stream StreamFile(string savepath)
         {
-            return File.ReadAllBytes(savepath);
+            return fileStorage.Download(savepath);
         }
 
 
@@ -326,11 +322,11 @@ namespace RPA.Inspections.Workbench.SL
             Guid holdingId = model.holdingId;
 
             string filepath = PathBuilder("CII Animal Data Spreadsheet v2.2.xlsm");
-            string savepath = PathBuilder("CII Animal Data Spreadsheet" + safeCPH + ".xlsm");
+            string savepath = $"packs/{prmodel.packRequestedId:N}/{Guid.NewGuid():N}/CII Animal Data Spreadsheet{safeCPH}.xlsm";
 
             FileInfo existingFile = new FileInfo(filepath);
 
-            ExcelPackage ePack = new ExcelPackage(existingFile);
+            using var ePack = new ExcelPackage(existingFile);
 
             ExcelWorksheet worksheet1 = ePack.Workbook.Worksheets["Inspection Data"];
             ExcelWorksheet worksheet2 = ePack.Workbook.Worksheets["Keeper Contact Details"];
@@ -417,9 +413,10 @@ namespace RPA.Inspections.Workbench.SL
             sheetModel9.CalculateCattleStats(LateCattleList, model.TotalMovesThisYear, holidayService);
 
 
-            FileInfo saving = new FileInfo(savepath);
-
-            ePack.SaveAs(saving);
+            using var output = new MemoryStream();
+            ePack.SaveAs(output);
+            output.Position = 0;
+            fileStorage.Upload(savepath, output, "application/vnd.ms-excel.sheet.macroEnabled.12");
 
             return (savepath);
 
@@ -445,4 +442,3 @@ namespace RPA.Inspections.Workbench.SL
 
     }
 }
-

@@ -1,21 +1,18 @@
-using RPA.Inspections.Workbench.Migrations;
 using RPA.Inspections.Workbench.Services;
-using System.Data.Entity.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var workbenchConnectionString = builder.Configuration.GetConnectionString("WorkbenchContext")
-    ?? throw new InvalidOperationException("Connection string 'WorkbenchContext' is not configured.");
+// Database schema changes are reviewed deployment operations, never startup actions.
+if (builder.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+{
+    throw new InvalidOperationException(
+        "ApplyMigrationsOnStartup is no longer supported. Follow the existing-schema deployment procedure in README.md.");
+}
+
+builder.Configuration.AddWorkbenchKeyVault(builder.Environment);
 builder.Services.AddWorkbenchApplication(builder.Configuration);
 
 var app = builder.Build();
-
-// Schema changes are normally applied by the deployment pipeline; this switch keeps the previous
-// "migrate on start-up" behaviour available for environments that still need it.
-if (builder.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
-{
-    new DbMigrator(new Configuration(workbenchConnectionString)).Update();
-}
 
 if (app.Environment.IsDevelopment())
 {

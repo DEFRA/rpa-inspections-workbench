@@ -3,6 +3,7 @@ using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 
 namespace RPA.Inspections.Workbench.SL
 {
@@ -29,7 +30,7 @@ namespace RPA.Inspections.Workbench.SL
             DateTime offDeathTestL1 = DateTime.Now.AddMonths(-3);
             DateTime DeathParse = new DateTime(1950, 1, 1);
 
-            model = db.Cattle.Where(x => x.holdingId == HoldingId && ((x.listNumber == "LIST1" && (x.deathDate == null || x.deathDate == DeathParse || x.deathDate > offDeathTestL1)) || (x.listNumber == "LIST2" && (x.offDate >= offDateTest && x.deathDate == null || x.offDate >= offDateTest && x.deathDate >= offDeathTest || x.offDate == null && x.deathDate == null || x.offDate == null && x.deathDate >= offDeathTest)))).OrderBy(x => x.listNumber).ThenBy(x => x.earTag).ToList();
+            model = db.Cattle.Include(x => x.Breed).Where(x => x.holdingId == HoldingId && ((x.listNumber == "LIST1" && (x.deathDate == null || x.deathDate == DeathParse || x.deathDate > offDeathTestL1)) || (x.listNumber == "LIST2" && (x.offDate >= offDateTest && x.deathDate == null || x.offDate >= offDateTest && x.deathDate >= offDeathTest || x.offDate == null && x.deathDate == null || x.offDate == null && x.deathDate >= offDeathTest)))).OrderBy(x => x.listNumber).ThenBy(x => x.earTag).ToList();
 
 
             return model;
@@ -44,7 +45,7 @@ namespace RPA.Inspections.Workbench.SL
 
             DateTime Current = DateTime.Now;
 
-            model = db.Cattle.Where(x => x.holdingId == HoldingId && x.lateNotification == true && x.notificationDate.Value.Year == Current.Year).OrderBy(x => x.lateType).ThenByDescending(x => x.numberOfDaysLate).ToList();
+            model = db.Cattle.Include(x => x.Breed).Where(x => x.holdingId == HoldingId && x.lateNotification == true && x.notificationDate.Value.Year == Current.Year).OrderBy(x => x.lateType).ThenByDescending(x => x.numberOfDaysLate).ToList();
 
             return model;
 
@@ -60,7 +61,7 @@ namespace RPA.Inspections.Workbench.SL
 
             Guid HoldingId = db.Holding.Where(x => x.cphNumber == CPHNumber).FirstOrDefault().holdingId;
 
-            model = db.Cattle.Where(x => x.holdingId == HoldingId).OrderBy(x => x.listNumber).ThenBy(x => x.earTag).ToList();
+            model = db.Cattle.Include(x => x.Breed).Where(x => x.holdingId == HoldingId).OrderBy(x => x.listNumber).ThenBy(x => x.earTag).ToList();
 
             return model;
 

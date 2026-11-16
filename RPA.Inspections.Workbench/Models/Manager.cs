@@ -8,14 +8,12 @@ using System.Linq;
 namespace RPA.Inspections.Workbench.Models
 {
     [ExcludeFromCodeCoverage]
-    [Table("OLA.Managers")]
+    [Table("Managers", Schema = "OLA")]
     public partial class Manager
     {
-        [Key]
         [Column(Order = 0)]
         public Guid personId { get; set; }
 
-        [Key]
         [Column(Order = 1)]
         public Guid managerId { get; set; }
 

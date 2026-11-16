@@ -20,7 +20,7 @@ namespace RPA.Inspections.Workbench.SL
 
         void ClearTables();
 
-        byte[] StreamFile(string savepath);
+        Stream StreamFile(string savepath);
 
         void RunAllBelow(Guid HoldingId);
 

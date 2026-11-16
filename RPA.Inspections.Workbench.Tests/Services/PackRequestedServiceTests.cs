@@ -29,6 +29,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         Mock<IMailService> mailService;
         IUserHelper userHelper;
         Mock<ISendService> sendService;
+        Mock<IFileStorage> fileStorage;
 
 
 
@@ -42,7 +43,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
             sendService = new Mock<ISendService>();
             userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
 
-            packService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
+            fileStorage = new Mock<IFileStorage>();
+            packService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object, fileStorage.Object);
         }
 
         [Test]
@@ -135,6 +137,30 @@ namespace RPA.Inspections.Workbench.Tests.SL
         }
 
         [Test]
+        public void FailedBlobDeletionDoesNotHideThePack()
+        {
+            var record = context.MockPackRequested.Object.First(x => x.display);
+            record.savePath = "packs/request/test.xlsm";
+            fileStorage.Setup(value => value.Delete(record.savePath)).Throws(new InvalidOperationException("Offline failure."));
+
+            Assert.Throws<InvalidOperationException>(() => packService.DeletePack(record.savePath, record.packRequestedId));
+            Assert.That(record.display, Is.True);
+            context.MockContext.Verify(value => value.SaveChanges(), Times.Never);
+        }
+
+        [Test]
+        public void MismatchedPackReferenceCannotDeleteAnotherBlob()
+        {
+            var record = context.MockPackRequested.Object.First(x => x.display);
+            record.savePath = "packs/request/test.xlsm";
+
+            Assert.Throws<InvalidOperationException>(() =>
+                packService.DeletePack("packs/another-request/test.xlsm", record.packRequestedId));
+            fileStorage.VerifyNoOtherCalls();
+            context.MockContext.Verify(value => value.SaveChanges(), Times.Never);
+        }
+
+        [Test]
         public void Test_DeletePack_DeletesPackfromPackReqTable()
         {
 
@@ -144,7 +170,10 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             //Act
 
-            packService.DeletePack("Test", Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31"));
+            var id = Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31");
+            context.MockPackRequested.Object.Single(x => x.packRequestedId == id).savePath = "packs/request/test.xlsm";
+            packService.DeletePack("packs/request/test.xlsm", id);
+            fileStorage.Verify(x => x.Delete("packs/request/test.xlsm"), Times.Once);
 
             //Assert
 

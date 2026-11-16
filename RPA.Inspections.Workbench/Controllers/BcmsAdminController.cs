@@ -16,11 +16,13 @@ namespace RPA.Inspections.Workbench.Controllers
     public class BcmsAdminController : Controller
     {
         IWorkbenchContext db;
+        IFileStorage fileStorage;
 
 
-        public BcmsAdminController(IWorkbenchContext db)
+        public BcmsAdminController(IWorkbenchContext db, IFileStorage fileStorage)
         {
             this.db = db;
+            this.fileStorage = fileStorage;
         }
 
         //Get: Bcms Admin page
@@ -81,7 +83,14 @@ namespace RPA.Inspections.Workbench.Controllers
                 return NotFound();
             }
 
-            return PhysicalFile(name, "text/html");
+            try
+            {
+                return File(fileStorage.Download(name), "text/html");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
 
         }
     }

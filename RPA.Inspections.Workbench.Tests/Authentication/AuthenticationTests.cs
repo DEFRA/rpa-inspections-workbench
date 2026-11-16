@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -31,6 +32,8 @@ public class AuthenticationTests
         ["Authorization:BcmsRole"] = "Workbench.Bcms",
         ["ConnectionStrings:WorkbenchContext"] = "Server=unused;Database=Workbench;Integrated Security=true",
         ["ConnectionStrings:PeopleContext"] = "Server=unused;Database=People;Integrated Security=true",
+        ["BlobStorage:ServiceUri"] = "https://workbench-test.blob.core.windows.net/",
+        ["BlobStorage:ContainerName"] = "workbench-files",
         ["ApplyMigrationsOnStartup"] = "false",
         ["AllowedHosts"] = "localhost"
     };
@@ -103,12 +106,56 @@ public class AuthenticationTests
     [TestCase("Authorization:AdminRole", "CI Inspections Workbench: Admin User")]
     [TestCase("Authorization:SuperUserRole", "Workbench.Admin")]
     [TestCase("Authorization:BcmsRole", "")]
+    [TestCase("ConnectionStrings:WorkbenchContext", "")]
+    [TestCase("ConnectionStrings:PeopleContext", "")]
+    [TestCase("ConnectionStrings:WorkbenchContext", "not a connection string")]
+    [TestCase("ConnectionStrings:PeopleContext", "Server=unused;UnsupportedOption=true")]
+    [TestCase("AllowedHosts", "")]
+    [TestCase("AllowedHosts", "*")]
+    [TestCase("AllowedHosts", "*.example.invalid")]
+    [TestCase("AllowedHosts", "https://example.invalid")]
+    [TestCase("AllowedHosts", "localhost:443")]
+    [TestCase("AllowedHosts", "localhost/path")]
+    [TestCase("AllowedHosts", "localhost;")]
+    [TestCase("HttpsRedirection:HttpsPort", "")]
+    [TestCase("HttpsRedirection:HttpsPort", "not-a-port")]
+    [TestCase("HttpsRedirection:HttpsPort", "0")]
+    [TestCase("HttpsRedirection:HttpsPort", "65536")]
+    [TestCase("BlobStorage:ServiceUri", "")]
+    [TestCase("BlobStorage:ServiceUri", "http://storage.invalid")]
+    [TestCase("BlobStorage:ServiceUri", "https://storage.invalid/container")]
+    [TestCase("BlobStorage:ServiceUri", "https://storage.invalid/?sig=not-allowed")]
+    [TestCase("BlobStorage:ContainerName", "Invalid-Container")]
+    [TestCase("BlobStorage:ContainerName", "a")]
+    [TestCase("BlobStorage:ContainerName", "invalid--container")]
+    [TestCase("BlobStorage:ManagedIdentityClientId", "not-a-guid")]
     public void InvalidConfigurationFailsBeforeServingRequests(string key, string value)
     {
         var settings = Settings();
         settings[key] = value;
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
-        Assert.Throws<InvalidOperationException>(() => new ServiceCollection().AddWorkbenchApplication(configuration));
+        var services = new ServiceCollection();
+        Assert.Throws<InvalidOperationException>(() => services.AddWorkbenchApplication(configuration));
+        Assert.That(services, Is.Empty);
+    }
+
+    [TestCase(null, 443)]
+    [TestCase("1", 1)]
+    [TestCase("7443", 7443)]
+    [TestCase("65535", 65535)]
+    public void ValidConfigurationRegistersHttpsPort(string configuredPort, int expectedPort)
+    {
+        var settings = Settings();
+        settings["AllowedHosts"] = "localhost;workbench.example.invalid";
+        if (configuredPort != null)
+            settings["HttpsRedirection:HttpsPort"] = configuredPort;
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
+        var services = new ServiceCollection().AddLogging();
+        services.AddWorkbenchApplication(configuration);
+        using var provider = services.BuildServiceProvider();
+
+        Assert.That(provider.GetRequiredService<IOptions<HttpsRedirectionOptions>>().Value.HttpsPort,
+            Is.EqualTo(expectedPort));
     }
 
     [Test]
@@ -140,7 +187,7 @@ public class AuthenticationTests
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("staff_number", value) },
             "Test", "staff_number", "roles"));
-        Assert.That(AuditIdentity.GetName(principal, "staff_number"), Is.EqualTo(expected));
+        Assert.That(ApplicationServices.GetAuditName(principal, "staff_number"), Is.EqualTo(expected));
     }
 
     [TestCase("")]
@@ -149,18 +196,18 @@ public class AuthenticationTests
     [TestCase("Display Name")]
     [TestCase("earth\\")]
     public void InvalidAuditValuesCannotBecomeRequesterIds(string value) =>
-        Assert.Throws<InvalidOperationException>(() => AuditIdentity.GetName(new ClaimsPrincipal(
+        Assert.Throws<InvalidOperationException>(() => ApplicationServices.GetAuditName(new ClaimsPrincipal(
             new ClaimsIdentity(new[] { new Claim("staff_number", value) }, "Test")), "staff_number"));
 
     [Test]
     public void AuditRejectsMissingDuplicateOrUnauthenticatedClaims()
     {
-        Assert.Throws<InvalidOperationException>(() => AuditIdentity.GetName(Principal(), "missing"));
-        Assert.Throws<InvalidOperationException>(() => AuditIdentity.GetName(new ClaimsPrincipal(new ClaimsIdentity(
+        Assert.Throws<InvalidOperationException>(() => ApplicationServices.GetAuditName(Principal(), "missing"));
+        Assert.Throws<InvalidOperationException>(() => ApplicationServices.GetAuditName(new ClaimsPrincipal(new ClaimsIdentity(
             new[] { new Claim("staff_number", "M600300") })), "staff_number"));
         var principal = Principal();
         ((ClaimsIdentity)principal.Identity).AddClaim(new Claim("staff_number", "M600400"));
-        Assert.Throws<InvalidOperationException>(() => AuditIdentity.GetName(principal, "staff_number"));
+        Assert.Throws<InvalidOperationException>(() => ApplicationServices.GetAuditName(principal, "staff_number"));
     }
 
     [Test]

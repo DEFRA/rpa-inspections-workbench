@@ -169,11 +169,15 @@ namespace RPA.Inspections.Workbench.Controllers
                     return NotFound();
                 }
 
-                byte[] packFile = fileService.StreamFile(savePath);
-
-                FileInfo info = new FileInfo(savePath);
-
-                return File(packFile, System.Net.Mime.MediaTypeNames.Application.Octet, info.Name);
+                try
+                {
+                    return File(fileService.StreamFile(savePath), System.Net.Mime.MediaTypeNames.Application.Octet,
+                        savePath[(savePath.LastIndexOf('/') + 1)..]);
+                }
+                catch (FileNotFoundException)
+                {
+                    return NotFound();
+                }
 
         }
 

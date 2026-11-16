@@ -3,6 +3,7 @@ using NUnit.Framework;
 using RPA.Inspections.Workbench.Controllers;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Models;
+using RPA.Inspections.Workbench.Services;
 using RPA.Inspections.Workbench.Tests.DAL.Mock;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,16 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
     {
         MockWorkbenchContext context;
         BcmsAdminController controller;
+        Mock<IFileStorage> fileStorage;
 
         [SetUp]
         public void Setup()
         {
             context = new MockWorkbenchContext();
            
-            controller = new BcmsAdminController(context.MockContext.Object);
+            fileStorage = new Mock<IFileStorage>();
+            fileStorage.Setup(x => x.Download(It.IsAny<string>())).Returns(() => new MemoryStream(new byte[] { 1, 2, 3 }));
+            controller = new BcmsAdminController(context.MockContext.Object, fileStorage.Object);
         }
 
         [Test]
@@ -68,8 +72,9 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
             var result = controller.open_report("test1");
 
-            Assert.AreEqual("test1", ((PhysicalFileResult)result).FileName);
-            Assert.AreEqual("text/html", ((PhysicalFileResult)result).ContentType);
+            using var stream = ((FileStreamResult)result).FileStream;
+            fileStorage.Verify(x => x.Download("test1"), Times.Once);
+            Assert.AreEqual("text/html", ((FileStreamResult)result).ContentType);
         }
 
         [Test]
@@ -78,6 +83,14 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             var result = controller.open_report("C:\\Windows\\win.ini");
 
             Assert.IsInstanceOf<NotFoundResult>(result);
+            fileStorage.Verify(value => value.Download(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public void MissingBlobForRecordedReportReturnsNotFound()
+        {
+            fileStorage.Setup(value => value.Download("test1")).Throws(new FileNotFoundException());
+            Assert.That(controller.open_report("test1"), Is.TypeOf<NotFoundResult>());
         }
     }
 }

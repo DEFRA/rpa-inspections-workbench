@@ -8,7 +8,7 @@ using System.Linq;
 namespace RPA.Inspections.Workbench.Models
 {
     [ExcludeFromCodeCoverage]
-    [Table("OLA.Locations")]
+    [Table("Locations", Schema = "OLA")]
     public partial class Location
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]

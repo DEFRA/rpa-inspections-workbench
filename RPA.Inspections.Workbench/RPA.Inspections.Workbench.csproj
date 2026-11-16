@@ -10,7 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.5.2" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.30.1" />
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
     <!-- Pin the patched version rather than Identity.Web's vulnerable transitive minimum. -->
@@ -19,24 +23,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Historical migrations are deployment-managed and never replayed at startup. -->
+    <Compile Remove="Migrations\**" />
+    <EmbeddedResource Remove="Migrations\**" />
     <!-- Files that were on disk but never part of the original project -->
-    <Compile Remove="Migrations\201902061506248_test.cs" />
-    <Compile Remove="Migrations\201902061506248_test.Designer.cs" />
-    <Compile Remove="Migrations\Interfaces\**" />
     <Compile Remove="Services\IExcelWrapper.cs" />
     <Compile Remove="Services\LateCattleCalculator.cs" />
-    <EmbeddedResource Remove="Migrations\201611301409238_schemeyear.resx" />
-    <EmbeddedResource Remove="Migrations\201612011341580_packgen.resx" />
-    <EmbeddedResource Remove="Migrations\201612011431210_tesst.resx" />
-    <EmbeddedResource Remove="Migrations\201612011433028_bytey.resx" />
-    <EmbeddedResource Update="Migrations\*.resx">
-      <DependentUpon>%(Filename).cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Excel templates used to build inspection packs; resolved from the application base directory -->
-    <None Update="Uploads\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Ship the read-only template, never historical generated inspection packs. -->
+    <None Update="Uploads\**" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+    <None Update="Uploads\CII Animal Data Spreadsheet v2.2.xlsm" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

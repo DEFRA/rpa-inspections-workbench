@@ -1,16 +1,16 @@
+using System.Data.Common;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Data.Entity.SqlServer;
+using System.Data.SqlClient;
 
-namespace RPA.Inspections.Workbench.DAL
+namespace RPA.Inspections.Workbench.DAL;
+
+public sealed class WorkbenchDbConfiguration : DbConfiguration
 {
-    // Code-based replacement for the <entityFramework> section of Web.config.
-    public class WorkbenchDbConfiguration : DbConfiguration
+    public WorkbenchDbConfiguration()
     {
-        public WorkbenchDbConfiguration()
-        {
-            SetProviderServices("System.Data.SqlClient", SqlProviderServices.Instance);
-            SetDefaultConnectionFactory(new SqlConnectionFactory());
-        }
+        DbProviderFactories.RegisterFactory("System.Data.SqlClient", SqlClientFactory.Instance);
+        SetProviderFactory("System.Data.SqlClient", SqlClientFactory.Instance);
+        SetProviderServices("System.Data.SqlClient", SqlProviderServices.Instance);
     }
 }

@@ -20,15 +20,17 @@ namespace RPA.Inspections.Workbench.SL
         IMailService MailService;
         IUserHelper userHelper;
         ISendService sendService;
+        IFileStorage fileStorage;
 
         private static object lockobject = new object();
 
-        public PackRequestedService(IWorkbenchContext context, IMailService mailService, IUserHelper userHelper, ISendService sendService)
+        public PackRequestedService(IWorkbenchContext context, IMailService mailService, IUserHelper userHelper, ISendService sendService, IFileStorage fileStorage)
         {
             this.db = context;
             this.MailService = mailService;
             this.userHelper = userHelper;
             this.sendService = sendService;
+            this.fileStorage = fileStorage;
         }
 
 
@@ -112,7 +114,7 @@ namespace RPA.Inspections.Workbench.SL
 
             List<PackRequested> model = new List<PackRequested>();
 
-            model = db.PackRequested.Where(x => x.activeRequest == true && x.requestedBy == UserId).OrderByDescending(x => x.datePackRequested).ToList();
+            model = db.PackRequested.Include(x => x.Holding).Where(x => x.activeRequest == true && x.requestedBy == UserId).OrderByDescending(x => x.datePackRequested).ToList();
 
             return model;
         }
@@ -129,7 +131,7 @@ namespace RPA.Inspections.Workbench.SL
 
             List<PackRequested> model = new List<PackRequested>();
 
-            model = db.PackRequested.Where(x => x.packGenerated != null && x.requestedBy.ToUpper() == UserId.ToUpper() && x.display == true).OrderByDescending(x => x.packGenerated).ToList();
+            model = db.PackRequested.Include(x => x.Holding).Where(x => x.packGenerated != null && x.requestedBy.ToUpper() == UserId.ToUpper() && x.display == true).OrderByDescending(x => x.packGenerated).ToList();
 
 
             return model;
@@ -140,12 +142,11 @@ namespace RPA.Inspections.Workbench.SL
         public void DeletePack(string savePath, Guid packRequested)
         {
 
-            if (File.Exists(savePath))
-            {
-                File.Delete(savePath);
-            }
+            PackRequested model = db.PackRequested.Single(x => x.packRequestedId == packRequested);
+            if (!string.Equals(model.savePath, savePath, StringComparison.Ordinal))
+                throw new InvalidOperationException("The file reference does not match the recorded pack request.");
 
-            PackRequested model = db.PackRequested.Where(x => x.packRequestedId == packRequested).FirstOrDefault();
+            fileStorage.Delete(savePath);
 
             model.display = false;
 

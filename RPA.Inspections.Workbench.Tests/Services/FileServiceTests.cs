@@ -16,6 +16,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using OfficeOpenXml;
+using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace RPA.Inspections.Workbench.Tests.SL
 {
@@ -34,6 +38,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         IUserHelper userHelper;
         Mock<ISendService> sendService;
         Mock<IHolidayService> holidayService;
+        Mock<IFileStorage> fileStorage;
 
 
         [SetUp]
@@ -48,7 +53,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
             filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
             userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
             holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
-            fileService = new FileService(context.MockContext.Object, cattleService, holdingService, sendService.Object, mailService.Object, holidayService.Object);
+            fileStorage = new Mock<IFileStorage>();
+            fileService = new FileService(context.MockContext.Object, cattleService, holdingService, sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
         }
 
         [Test]
@@ -200,6 +206,113 @@ namespace RPA.Inspections.Workbench.Tests.SL
         }
 
         [Test]
+        public void BulkImportReadsWorkbookInMemoryWithoutCreatingFiles()
+        {
+            var before = Directory.GetFiles(fileService.PathBuilder("")).OrderBy(path => path).ToArray();
+            using var source = new MemoryStream();
+            using (var workbook = new ExcelPackage())
+            {
+                var sheet = workbook.Workbook.Worksheets.Add("Import");
+                sheet.Cells[1, 1].Value = "CPH";
+                sheet.Cells[1, 2].Value = "SBI";
+                sheet.Cells[2, 1].Value = "12/345/6789";
+                sheet.Cells[2, 2].Value = "123456789";
+                workbook.SaveAs(source);
+            }
+            source.Position = 0;
+            var upload = new FormFile(source, 0, source.Length, "bulkSource", "../../untrusted-name.xlsx");
+
+            var table = fileService.BulkData(upload);
+
+            Assert.That(table.Rows, Has.Count.EqualTo(1));
+            Assert.That(table.Rows[0][0], Is.EqualTo("12/345/6789"));
+            Assert.That(Directory.GetFiles(fileService.PathBuilder("")).OrderBy(path => path), Is.EqualTo(before));
+            fileStorage.VerifyNoOtherCalls();
+        }
+
+        [Test]
+        public void GeneratedPacksUploadMacroWorkbooksWithUniqueKeysWithoutWritingLocalFiles()
+        {
+            var before = Directory.GetFiles(fileService.PathBuilder("")).OrderBy(path => path).ToArray();
+            var template = fileService.PathBuilder("CII Animal Data Spreadsheet v2.2.xlsm");
+            var templateHash = SHA256.HashData(File.ReadAllBytes(template));
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var request = new PackRequested(holding.holdingId);
+            var uploadedNames = new List<string>();
+            fileStorage.Setup(value => value.Upload(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>()))
+                .Callback((string name, Stream content, string contentType) =>
+                {
+                    uploadedNames.Add(name);
+                    Assert.That(contentType, Is.EqualTo("application/vnd.ms-excel.sheet.macroEnabled.12"));
+                    using var archive = new ZipArchive(content, ZipArchiveMode.Read, leaveOpen: true);
+                    Assert.That(archive.GetEntry("xl/workbook.xml"), Is.Not.Null);
+                    Assert.That(archive.GetEntry("xl/vbaProject.bin"), Is.Not.Null);
+                });
+
+            var first = fileService.InspectionPackCreate(holding, request);
+            var second = fileService.InspectionPackCreate(holding, request);
+
+            Assert.That(first, Does.StartWith($"packs/{request.packRequestedId:N}/"));
+            Assert.That(first, Does.EndWith("/CII Animal Data Spreadsheet123456789.xlsm"));
+            Assert.That(second, Is.Not.EqualTo(first));
+            Assert.That(uploadedNames, Is.EqualTo(new[] { first, second }));
+            Assert.That(SHA256.HashData(File.ReadAllBytes(template)), Is.EqualTo(templateHash));
+            Assert.That(Directory.GetFiles(fileService.PathBuilder("")).OrderBy(path => path), Is.EqualTo(before));
+        }
+
+        [Test]
+        public void FailedPackUploadDoesNotMarkRequestGeneratedOrSendNotification()
+        {
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var request = new PackRequested(holding.holdingId);
+            context.MockHolding.Object.Add(holding);
+            context.MockPackRequested.Object.Add(request);
+            var holdingLookup = new Mock<IHoldingService>();
+            holdingLookup.Setup(value => value.GetHoldingById(holding.holdingId)).Returns(holding);
+            var generator = new FileService(context.MockContext.Object, cattleService, holdingLookup.Object,
+                sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
+            fileStorage.Setup(value => value.Upload(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>()))
+                .Throws(new InvalidOperationException("Offline storage failure."));
+
+            Assert.Throws<InvalidOperationException>(() => generator.RunAllBelow(holding.holdingId));
+            Assert.That(request.activeRequest, Is.True);
+            Assert.That(request.packGenerated, Is.Null);
+            Assert.That(request.savePath, Is.Null);
+            context.MockContext.Verify(value => value.SaveChanges(), Times.Never);
+            sendService.VerifyNoOtherCalls();
+        }
+
+        [Test]
+        public void CompletedPackIsRecordedOnlyAfterUpload()
+        {
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var request = new PackRequested(holding.holdingId);
+            context.MockHolding.Object.Add(holding);
+            context.MockPackRequested.Object.Add(request);
+            var holdingLookup = new Mock<IHoldingService>();
+            holdingLookup.Setup(value => value.GetHoldingById(holding.holdingId)).Returns(holding);
+            var generator = new FileService(context.MockContext.Object, cattleService, holdingLookup.Object,
+                sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
+            var events = new List<string>();
+            string uploadedName = null;
+            fileStorage.Setup(value => value.Upload(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>()))
+                .Callback((string name, Stream content, string contentType) =>
+                {
+                    uploadedName = name;
+                    events.Add("uploaded");
+                });
+            context.MockContext.Setup(value => value.SaveChanges()).Callback(() => events.Add("saved")).Returns(1);
+
+            generator.RunAllBelow(holding.holdingId);
+
+            Assert.That(events, Is.EqualTo(new[] { "uploaded", "saved" }));
+            Assert.That(request.savePath, Is.EqualTo(uploadedName));
+            Assert.That(request.packGenerated, Is.Not.Null);
+            Assert.That(request.activeRequest, Is.False);
+            sendService.Verify(value => value.sendEmail(It.IsAny<System.Net.Mail.MailMessage>()), Times.Once);
+        }
+
+        [Test]
 
         public void Test_TenPercentCattleSelector_Selects_Correctly_Option_1()
         {
@@ -257,4 +370,3 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
     }
 }
-

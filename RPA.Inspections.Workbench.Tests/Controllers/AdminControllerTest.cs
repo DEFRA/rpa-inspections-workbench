@@ -52,7 +52,7 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             sendService = new Mock<ISendService>();
             
             holidayService = new Mock<IHolidayService>();
-            packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object);
+            packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object, Mock.Of<IFileStorage>());
 
             controller = new AdminController(context.MockContext.Object, peopleContext.MockContext.Object, holdingService, cattleService, breedService, packRequestedService, mailService.Object, fileService.Object, filterService, userHelper, sendService.Object, holidayService.Object);
 

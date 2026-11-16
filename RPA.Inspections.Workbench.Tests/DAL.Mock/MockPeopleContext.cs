@@ -59,4 +59,3 @@ namespace RPA.Inspections.Workbench.Tests.DAL.Mock
         }
     }
 }
-
