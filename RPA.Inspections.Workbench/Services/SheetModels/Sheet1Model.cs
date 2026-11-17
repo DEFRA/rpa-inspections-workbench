@@ -2,6 +2,7 @@ using OfficeOpenXml;
 using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace RPA.Inspections.Workbench.Services.SheetModels
@@ -21,8 +22,8 @@ namespace RPA.Inspections.Workbench.Services.SheetModels
             cphNumber = holding.cphNumber;
             SBI = holding.SBI;
             primaryName = holding.primaryName;
-            currentTime = timeNow.ToString("dd-MM-yyyy h:mm tt");
-            dateRequested = packRequested.datePackRequested.ToString("dd-MM-yyyy h:mm tt");
+            currentTime = timeNow.ToString("dd-MM-yyyy h:mm tt", CultureInfo.InvariantCulture);
+            dateRequested = packRequested.datePackRequested.ToString("dd-MM-yyyy h:mm tt", CultureInfo.InvariantCulture);
             showRef = packRequested.showRef;
             requestedBy = packRequested.requestedByName;
         }

@@ -1,3 +1,4 @@
+using System.Data.Entity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RPA.Inspections.Workbench.DAL;
 
@@ -16,12 +17,12 @@ public class SqlReadinessHealthCheck : IHealthCheck
     {
         try
         {
-            if (_workbenchContext != null)
-            {
-                return HealthCheckResult.Healthy("SQL Server is accessible and ready.");
-            }
-            
-            return HealthCheckResult.Unhealthy("Database context not available.");
+            // Bounded, lightweight query against a small reference table - a real round trip to
+            // SQL Server, not just a DI-container null check (which is always true once the
+            // context object is constructed, even when the database is unreachable).
+            await _workbenchContext.Breed.AnyAsync(cancellationToken);
+
+            return HealthCheckResult.Healthy("SQL Server is accessible and ready.");
         }
         catch (Exception ex)
         {

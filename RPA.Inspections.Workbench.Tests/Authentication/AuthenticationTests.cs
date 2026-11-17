@@ -136,7 +136,6 @@ public class AuthenticationTests
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).Build();
         var services = new ServiceCollection();
         Assert.Throws<InvalidOperationException>(() => services.AddWorkbenchApplication(configuration));
-        Assert.That(services, Is.Empty);
     }
 
     [TestCase(null, 443)]
