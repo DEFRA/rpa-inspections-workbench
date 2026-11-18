@@ -298,6 +298,22 @@ tracked/detached edits, lazy/eager loading, People audit lookups and BCMS/pack r
 Behavioral persistence tests use isolated transient Effort.EF6 2.2.17 databases
 (NMemory 3.1.4) with EF6 6.4.4, not EF Core or SQLite. Production database initializers
 remain disabled; only test contexts create transient test databases.
+
+## Container
+
+The multi-stage [Dockerfile](./Dockerfile) follows the Defra .NET container
+standard ([defra-docker-dotnetcore](https://github.com/DEFRA/defra-docker-dotnetcore)):
+a `development` stage (`defradigital/dotnetcore-development`) restores, tests
+and publishes the app; a `production` stage (`defradigital/dotnetcore`) runs
+it as the non-root `dotnet` user with write permissions removed.
+`DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false` keeps ICU enabled for `en-GB`,
+and it listens on HTTP 8080.
+
+```powershell
+docker build --target production -t inspections-workbench:local .
+# Optional non-secret package source, replacing configured restore sources:
+docker build --target production --build-arg NUGET_SOURCE="https://your-feed/v3/index.json" -t inspections-workbench:local .
+```
 Offline provider results are not a claim of SQL Server execution compatibility.
 The SQL Server acceptance tests are opt-in and read-only; without explicit test
 connections they are skipped. Live SQL schema/write parity and deployed tenant
