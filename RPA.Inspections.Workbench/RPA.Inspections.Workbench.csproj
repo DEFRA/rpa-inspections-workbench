@@ -15,9 +15,10 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.5" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.30.1" />
-    <PackageReference Include="EntityFramework" Version="6.5.2" />
-    <PackageReference Include="Microsoft.EntityFramework.SqlServer" Version="6.5.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" PrivateAssets="all" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
     <!-- Pin the patched version rather than Identity.Web's vulnerable transitive minimum. -->
@@ -26,9 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Historical migrations are deployment-managed and never replayed at startup. -->
-    <Compile Remove="Migrations\**" />
-    <EmbeddedResource Remove="Migrations\**" />
     <!-- Files that were on disk but never part of the original project -->
     <Compile Remove="Services\IExcelWrapper.cs" />
     <Compile Remove="Services\LateCattleCalculator.cs" />
@@ -41,3 +39,4 @@
   </ItemGroup>
 
 </Project>
+

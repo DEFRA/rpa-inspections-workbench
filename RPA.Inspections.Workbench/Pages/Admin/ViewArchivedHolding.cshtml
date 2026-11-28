@@ -1,0 +1,85 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.ViewArchivedHoldingModel
+@{
+    ViewData["Title"] = "ViewArchivedHolding";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Page("/Index")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/ArchivedList")'">Back</button>
+</div>
+
+<h2>View Archived Holding</h2>
+
+
+
+    <table>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.cphNumber) </td>
+            <td>
+                @Html.DisplayFor(model => model.Holding.cphNumber)
+        </td>
+    </tr>
+    <tr><td><br /></td></tr>
+    <tr style="font-size:18px">
+        <td>@Html.LabelFor(model => model.Holding.primaryName) </td>
+        <td>
+            @Html.DisplayFor(model => model.Holding.primaryName)
+        </td>
+    </tr>
+    <tr><td><br /></td></tr>
+    <tr style="font-size:18px">
+        <td>@Html.LabelFor(model => model.Holding.SBI) </td>
+        <td>
+            @Html.DisplayFor(model => model.Holding.SBI)
+    </td>
+</tr>
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.schemeYear) </td>
+    <td>
+        @Html.DisplayFor(model => model.Holding.schemeYear)
+</td>
+</tr>
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.selectionMethod) </td>
+    <td>
+        @Html.DisplayFor(model => model.Holding.selectionMethod)
+    </td>
+</tr>
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.inspectionDeadlineDate) </td>
+    <td>
+        @Html.DisplayFor(model => model.Holding.inspectionDeadlineDate)
+    </td>
+</tr>
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.animalsToBeInspected) </td>
+    <td>@Html.DisplayFor(model => model.Holding.animalsToBeInspected) </td>
+</tr>
+<tr><td><br /></td></tr>
+
+
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.AssignedUser) </td>
+    <td>
+        <input type="hidden" id="id" name="id" value="" />
+        @Html.DisplayFor(model => model.Holding.AssignedUser, new { @id = "Psearch", @name = "Psearch" })
+
+    </td>
+</tr>
+<tr><td><br /></td></tr>
+<tr style="font-size:18px">
+    <td>@Html.LabelFor(model => model.Holding.AssignedDate) </td>
+    <td>@Html.DisplayFor(model => model.Holding.AssignedDate) </td>
+
+</tr>
+<tr><td><br /></td></tr>
+</table>
+

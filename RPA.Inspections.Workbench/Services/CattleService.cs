@@ -3,7 +3,7 @@ using RPA.Inspections.Workbench.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.Inspections.Workbench.SL
 {

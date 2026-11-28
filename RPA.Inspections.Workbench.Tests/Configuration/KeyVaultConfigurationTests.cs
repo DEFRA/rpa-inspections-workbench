@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Azure;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
@@ -119,9 +120,9 @@ public class KeyVaultConfigurationTests
         services.AddWorkbenchApplication(configuration);
         using var provider = services.BuildServiceProvider();
         using var scope = provider.CreateScope();
-        Assert.That(scope.ServiceProvider.GetRequiredService<WorkbenchContext>().Database.Connection.Database,
+        Assert.That(scope.ServiceProvider.GetRequiredService<WorkbenchContext>().Database.GetDbConnection().Database,
             Is.EqualTo("VaultWorkbench"));
-        Assert.That(scope.ServiceProvider.GetRequiredService<PeopleContext>().Database.Connection.Database,
+        Assert.That(scope.ServiceProvider.GetRequiredService<PeopleContext>().Database.GetDbConnection().Database,
             Is.EqualTo("VaultPeople"));
     }
 
@@ -186,3 +187,4 @@ public class KeyVaultConfigurationTests
         Assert.That(configuration.GetSection("ConnectionStrings").GetChildren(), Is.Empty);
     }
 }
+

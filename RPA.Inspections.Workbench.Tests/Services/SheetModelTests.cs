@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Services.SheetModels;
@@ -256,7 +256,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             var mockSheet = new Dictionary<string, Object>();
             // Arrange
-            List<Cattle> cattleList = context.MockCattle.Object.ToList();
+            List<Cattle> cattleList = context.Context.Cattle.ToList();
 
 
             // Act

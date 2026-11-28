@@ -1,0 +1,59 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.BreedListModel
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "BreedList";
+}
+
+<h2>Breed List</h2>
+
+<form method="get">
+    <div class="float-left">
+        <input type="text" name="searchString" id="searchString" />
+    </div>
+    <div class="float-left" style="margin-left:10px">
+        <button class="button" style="position:static;" id="searchButton">Search</button>
+    </div>
+</form>
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/BreedList")'">Clear</button>
+</div>
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/AddBreed")'">Add Breed</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/Index")'">Back</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Index")'">Home</button>
+</div>
+
+<table class="table">
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.Breeds[0].breedCode)</th>
+        <th>@Html.DisplayNameFor(model => model.Breeds[0].breedFull)</th>
+        <th>@Html.DisplayNameFor(model => model.Breeds[0].Active)</th>
+        <th>Edit</th>
+    </tr>
+
+    @foreach (var item in Model.Breeds)
+    {
+        <tr id="@item.breedId">
+            <td align="center">@item.breedCode</td>
+            <td align="center">@item.breedFull</td>
+            <td align="center"><input type="checkbox" checked="@item.Active" disabled="disabled" /></td>
+            <td align="center"><button style="margin-left:10px" onclick="location.href='@Url.Page("/Admin/ViewBreed", new { BreedId = item.breedId })'">Edit</button></td>
+        </tr>
+    }
+</table>
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model.Breeds, page => RPA.Inspections.Workbench.Helpers.PageQuery.PagerUrl(Url.Page("/Admin/BreedList"), Model.SearchString, page, Model.Breeds.PageSize))
+    Showing @(Model.Breeds.TotalItemCount < Model.Breeds.FirstItemOnPage ? 0 : Model.Breeds.FirstItemOnPage) to @Model.Breeds.LastItemOnPage of @Model.Breeds.TotalItemCount Breeds
+</div>

@@ -1,0 +1,39 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.SchemeYearAdminModel
+@{
+    ViewData["Title"] = "SchemeYearAdmin";
+}
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/Index")'">Back</button>
+</div>
+
+<h2>Scheme Year Admin</h2>
+
+<form method="post" id="SchemeYearAdmin">
+    <table class="table">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Controls[0].Value)</th>
+            <th>@Html.DisplayNameFor(model => model.Controls[0].Active)</th>
+        </tr>
+
+        @for (int i = 0; i < Model.Controls.Count; i++)
+        {
+            <tr>
+                <input type="hidden" asp-for="Controls[i].ControlId" />
+                <input type="hidden" asp-for="Controls[i].Property" />
+                <input type="hidden" asp-for="Controls[i].Value" />
+                <td style="text-align:center">@Model.Controls[i].Value</td>
+                <td style="text-align:center"><input asp-for="Controls[i].Active" /></td>
+            </tr>
+        }
+    </table>
+
+    <div class="form-group">
+        <input type="submit" value="Save Active Scheme Years" class="button" />
+    </div>
+</form>
+
+<form method="post" asp-page-handler="AddNext">
+    <button style="position:static;">Add Next Scheme Year</button>
+</form>

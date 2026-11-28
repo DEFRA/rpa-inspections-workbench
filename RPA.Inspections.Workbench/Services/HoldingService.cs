@@ -187,13 +187,7 @@ namespace RPA.Inspections.Workbench.SL
 
             foreach(string year in archivedYears)
             {
-                foreach(Holding holding in db.Holding)
-                {
-                    if(holding.schemeYear == year)
-                    {
-                        archivedHoldings.Add(holding);
-                    }
-                }
+                archivedHoldings.AddRange(db.Holding.Where(x => x.schemeYear == year).OrderBy(x => x.primaryName).ToList());
             }
 
             if (!string.IsNullOrEmpty(searchString))
@@ -210,3 +204,4 @@ namespace RPA.Inspections.Workbench.SL
         }
     }
 }
+

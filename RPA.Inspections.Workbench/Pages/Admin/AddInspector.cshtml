@@ -1,0 +1,68 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.AddInspectorModel
+@{
+    ViewData["Title"] = "Add Inspector";
+}
+
+<h2>Add Inspector</h2>
+
+<form method="post">
+    <div class="form-horizontal">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Inspector.staffNumber" class="control-label col-md-2"></label>
+            <div class="col-md-10">
+                <input asp-for="Inspector.staffNumber" id="Psearch" />
+                <span asp-validation-for="Inspector.staffNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add Inspector" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-page="InspectorList">Back to List</a>
+</div>
+<script>
+          // search function and autocomplete for people section
+
+            $(document).ready(function () {
+                $('#Psearch').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            dataType: 'json',
+                            type: 'Get',
+                            url: '@Url.Action("PeopleSearch", "Admin")',
+                            data: { searchstring: request.term },
+
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item
+
+                                    })
+                                );
+                            }
+                        })
+                    },
+
+
+
+
+
+                    select: function (event, ui) {
+                        $('#Psearch').val(ui.item.value);
+                        $('#id').val(ui.item.value);
+
+                        return false;
+
+                    },
+                    minLength: 1
+                })
+    });
+
+</script>

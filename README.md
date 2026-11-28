@@ -1,9 +1,8 @@
 # Inspections Workbench
 
-ASP.NET Core MVC (.NET 10), using **Entity Framework 6.4.4** and its
-`System.Data.SqlClient` SQL Server provider for Workbench and People data.
-This intentionally differs from CPH's EF Core version. The web framework,
-authentication and Key Vault integration remain unchanged.
+ASP.NET Core Razor Pages and MVC (.NET 10), using **Entity Framework Core 10** and the
+`Microsoft.Data.SqlClient` SQL Server provider for Workbench and People data. The
+authentication and Key Vault integration are unchanged.
 
 ## Authentication and permissions
 
@@ -41,7 +40,7 @@ Supply these settings externally (environment variables use `__` instead of `:`)
 | `HttpsRedirection:HttpsPort` | HTTPS redirect port from 1 to 65535; defaults to `443`. Set the local HTTPS port when applicable |
 
 Configuration is validated before application services are registered. Both SQL connection
-strings must parse as System.Data.SqlClient connection strings; this does not verify
+strings must parse as SQL Server (`Microsoft.Data.SqlClient`) connection strings; this does not verify
 database connectivity or credentials. Invalid hostnames or HTTPS ports also prevent startup.
 
 ### Key Vault configuration
@@ -212,40 +211,23 @@ the requester ID. The no-HTTP-context helper behavior remains `Unknown`.
   Entra interactive sign-in does not migrate Integrated Security database connections,
   application pool credentials, pickup directory access, or People data.
 - Schema adoption/migrations are deployment-managed. Leave `ApplyMigrationsOnStartup=false`;
-  setting it to true now fails startup rather than replaying EF6 migrations.
+  setting it to true fails startup.
 
 Forbidden requests redirect to `/Account/AccessDenied` (403); OIDC failures redirect to
 `/Account/AuthenticationFailed` (401). These anonymous endpoints do not expose exceptions,
 tokens or identity data. Authentication failure logging records only a failure code.
 
-## Entity Framework 6.4.4 and existing databases
+## Entity Framework Core 10 and existing databases
 
-The application references `EntityFramework` **6.4.4**, not EF Core. Both contexts use
-EF6 `DbContext`/`DbSet`, fluent mappings, built-in lazy-loading proxies and automatic
-DataAnnotations validation. Validation failures on save use EF6's
-`DbEntityValidationException`. Normal change detection remains enabled for tracked
-edits; disconnected updates continue to use `SetModified`.
+The application references `Microsoft.EntityFrameworkCore.SqlServer` **10.0.x** (`Microsoft.EntityFrameworkCore.Design` for tooling). Both contexts are EF Core `DbContext`s with fluent mappings that preserve the legacy EF6 table, column, key and foreign-key names. Contexts are registered with `AddDbContext` and `UseSqlServer(..., EnableRetryOnFailure)`. Lazy loading is **not** used: navigation data is loaded with explicit `Include`/`AsSplitQuery`. DataAnnotations validation still runs on save, but failures now throw `System.ComponentModel.DataAnnotations.ValidationException` (EF6 threw `DbEntityValidationException`). Disconnected updates continue to use `SetModified`.
 
-Both contexts are scoped services, and their interfaces resolve the same scoped
-instances. Connections come from configuration (including Key Vault), not EF6
-`App.config` connection-string lookup. `WorkbenchDbConfiguration` explicitly registers
-the EF6 `System.Data.SqlClient` factory and provider services. This legacy provider is
-required by the selected EF6 version and is deprecated; it is not replaced with the
-incompatible EF Core SQL Server provider.
+Workbench retains nine `IW` tables, SQL `datetime` columns, client-assigned GUID keys, the `PackRequested.Id` and `SchemeNameDropId` identities, four required cascading relationships and the optional non-cascading scheme relationship. People remains externally owned: `OLA.People`, `OLA.Locations` and `OLA.Managers`, including existing column names, lengths and the composite `(personId, managerId)` key.
 
-Workbench retains nine `IW` tables, SQL `datetime` columns, client-assigned GUID keys,
-the `PackRequested.Id` and `SchemeNameDropId` identities, four required cascading
-relationships and the optional non-cascading scheme relationship. People remains
-externally owned: `OLA.People`, `OLA.Locations` and `OLA.Managers`, including existing
-column names, lengths and the composite `(personId, managerId)` key.
+No EF Core migrations are adopted: the schema is deployment-managed, startup never creates, drops or migrates either database, and `ApplyMigrationsOnStartup=true` fails startup. The mapping is verified by `Persistence\MappingProviderTests`, which compares the model to the archived EF6 storage model (`Fixtures\EF6WorkbenchModel.resx`). Historical `Migrations/` files remain excluded from compilation for reference. Do not alter existing `__MigrationHistory` tables as part of this change.
 
-Database initializers are disabled for **both** production contexts. Startup never
-creates, drops or migrates either database. `ApplyMigrationsOnStartup=true` still
-fails startup. Historical `Migrations/` files/resources remain excluded from compilation
-and unchanged for reference; they must not be replayed automatically.
-EF Core baseline artifacts and the local `dotnet-ef` tool manifest have been removed.
-Do not run the former EF Core baseline deployment commands or alter existing
-`__MigrationHistory`/`__EFMigrationsHistory` tables as part of this application change.
+## Razor Pages
+
+The MVC views were converted to Razor Pages under `Pages/` using folder routes that keep the legacy URLs (for example `/Admin/BreedList`, `/Holding`, `/BcmsAdmin`; `/Home` maps to the index page). `AdminController.PeopleSearch`, `BcmsAdminController.open_report` and `HoldingController.{PackRequest, PeopleUpdate, GetPack}` stay as controller endpoints at their existing routes. Former state-changing GETs (`RemoveInspector`, `AddSchemeYear`, `DeletePack`) are now antiforgery-protected POST handlers; search forms use GET and keep the search term when paging. BCMS bulk/specific requests are `?handler=Bulk` and `?handler=Specific` on `/BcmsAdmin`.
 
 ### Required schema acceptance and rollout
 
@@ -269,10 +251,9 @@ Do not run the former EF Core baseline deployment commands or alter existing
    SQL identity generation, SQL date rounding and relevant external pack processors.
    Offline provider tests cannot certify these SQL Server details.
 5. Deploy with external connection/identity settings and startup migrations disabled.
-   The legacy `System.Data.SqlClient` provider does **not** share modern SqlClient's
-   encryption defaults: require `Encrypt=True;TrustServerCertificate=False` in approved
-   vault connection strings and provision a trusted SQL Server certificate. Validate
-   Integrated Security/network access for the process identity.
+   `Microsoft.Data.SqlClient` encrypts by default: require `Encrypt=True;TrustServerCertificate=False`
+   in approved vault connection strings and provision a trusted SQL Server certificate.
+   Validate Integrated Security/network access for the process identity.
 6. Finish HTTPS/Entra, file/template, SMTP and holiday-service acceptance. Rollback
    restores the previous application deployment; this version change performs no schema
    operations. Future schema changes require a separately reviewed deployment script.
@@ -293,11 +274,7 @@ The authentication tests use local signing keys/static OIDC metadata and an offl
 host; they do not require Entra, IDT, SQL, SMTP, or the holiday service. A real tenant sign-in
 and representative staff-number/permission acceptance check are still required before go-live.
 
-Tests cover EF6 mapping/snapshot parity, scoped contexts, startup migration rejection,
-tracked/detached edits, lazy/eager loading, People audit lookups and BCMS/pack requests.
-Behavioral persistence tests use isolated transient Effort.EF6 2.2.17 databases
-(NMemory 3.1.4) with EF6 6.4.4, not EF Core or SQLite. Production database initializers
-remain disabled; only test contexts create transient test databases.
+Tests cover the EF Core mapping against the archived EF6 storage model, scoped contexts, startup migration rejection, tracked/detached edits, explicit `Include` loading (lazy loading is not used), People audit lookups, BCMS/pack requests and the Razor Pages. Behavioural tests run the real contexts over a shared open in-memory SQLite connection (`DAL.Mock\MockWorkbenchContext`); SQLite has no schemas, so the `IW`/`OLA` schema names are ignored there, and the non-key identity `PackRequested.Id` is assigned by the test context. These tests do not prove SQL Server behaviour.
 
 ## Container
 
@@ -319,11 +296,7 @@ The SQL Server acceptance tests are opt-in and read-only; without explicit test
 connections they are skipped. Live SQL schema/write parity and deployed tenant
 acceptance remain **unverified**.
 
-Verification on 2026-11-09: application build succeeded and the full Debug suite
-passed **251 tests, 3 skipped, 0 failed** (254 total). The skips are the two
-unconfigured live SQL acceptance tests and the existing redacted-recipient mail test.
-Resolved application and test assets contain `EntityFramework/6.4.4` and no
-`Microsoft.EntityFrameworkCore` packages. CPH was not changed.
+Verification: `dotnet build` and `dotnet test` on the solution pass (273 passed, 3 skipped, 0 failed). The skips are the two unconfigured live SQL acceptance tests and the existing redacted-recipient mail test. The application references `Microsoft.EntityFrameworkCore.SqlServer` 10.0.15 and the tests use `Microsoft.EntityFrameworkCore.Sqlite`; no `EntityFramework` 6.x package remains.
 
 Restore/build currently report **NU1904** for the pre-existing EPPlus transitive dependency
 `System.Drawing.Common 4.7.0` (GHSA-rxg9-xrhp-64gj). It was not introduced or remediated by

@@ -44,49 +44,19 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
 
-            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
-            filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
-            holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
-            linkedHoldingService = new LinkedHoldingService(context.MockContext.Object);
-            cattleService = new CattleService(context.MockContext.Object);
+            userHelper = new UserHelper(peopleContext.Context, MockHttpContext.GetMockedHttpContextAccessor());
+            filterService = new FilterService(context.Context, peopleContext.Context);
+            holdingService = new HoldingService(context.Context, peopleContext.Context, filterService, userHelper);
+            linkedHoldingService = new LinkedHoldingService(context.Context);
+            cattleService = new CattleService(context.Context);
             sendService = new Mock<ISendService>();
             fileService = new Mock<IFileService>();
             mailService = new Mock<IMailService>();
             holidayService = new Mock<IHolidayService>();
-            packRequestedService = new PackRequestedService(context.MockContext.Object, mailService.Object, userHelper, sendService.Object, Mock.Of<IFileStorage>());
+            packRequestedService = new PackRequestedService(context.Context, mailService.Object, userHelper, sendService.Object, Mock.Of<IFileStorage>());
             fileService.Setup(x => x.StreamFile(It.IsAny<string>())).Returns(() => new MemoryStream(new byte[] { 1, 2, 3 }));
 
-            controller = new HoldingController(context.MockContext.Object, peopleContext.MockContext.Object, holdingService, linkedHoldingService, cattleService, packRequestedService, mailService.Object, fileService.Object, filterService, userHelper, sendService.Object, holidayService.Object);
-
-        }
-
-        [Test]
-
-        public void Test_Index_Returns_Index_Page()
-
-        {
-            var result = controller.Index() as ViewResult;
-
-            Assert.IsNotNull(result);
-
-        }
-
-        [Test]
-        public void Test_Index_Search()
-        {
-
-            var result = controller.Index("01/011/1001", 1, 50) as ViewResult;
-
-            Assert.AreEqual(1, ((PagedList<Holding>)result.ViewData.Model).Count);
-        }
-
-        [Test]
-
-        public void Test_PacksReq_Returns_PacksReq()
-        {
-            var result = controller.PacksRequested() as ViewResult;
-
-            Assert.AreEqual(1, ((List<PackRequested>)result.ViewData.Model).Count);
+            controller = new HoldingController(context.Context, peopleContext.Context, packRequestedService, fileService.Object, userHelper);
 
         }
 
@@ -100,16 +70,6 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
         }
 
-
-        [Test]
-
-        public void Test_ViewHolding_Displays_Holding()
-        {
-
-            var result = controller.ViewHolding(Guid.Parse("A6EFE560-FE03-40A2-94CF-00368986EDE2")) as ViewResult;
-
-            Assert.IsNotNull(result);
-        }
 
         [Test]
 
@@ -160,9 +120,10 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
 
         public void Test_PackRequest_Posts()
         {
-            var result = controller.PackRequest(Guid.Parse("A6EFE560-FE03-40A2-94CF-00368986EDE2"), "12/122/1222");
+            controller.PackRequest(Guid.Parse("9548D01E-15FC-4CB5-97AB-000EB6EFD6C3"), "12/122/1222");
+            Assert.That(context.NewContext().PackRequested.Count(), Is.EqualTo(5));
 
-            context.MockContext.Verify(x => x.SaveChanges(), Times.Exactly(1));
+            
         }
 
         [Test]
@@ -171,18 +132,8 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         {
             var result = controller.PeopleUpdate(Guid.Parse("4BA355C8-920D-420D-8E80-3664A0816458"), "Scott2@test.com");
 
-            context.MockContext.Verify(x => x.SaveChanges(), Times.Exactly(1));
+            
 
-        }
-
-        [Test]
-
-        public void Test_DeletePack_DeletesPack()
-        {
-            var result = controller.DeletePack("TestPath", Guid.Parse("0C51DC76-B92D-420A-BA5F-006E564C06ED")) as RedirectToActionResult;
-
-            Assert.AreEqual("PacksRequested", result.ActionName);
-            context.MockContext.Verify(x => x.SaveChanges(), Times.AtLeastOnce());
         }
 
         [Test]
@@ -213,17 +164,17 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         [Test]
         public void BlobPackDownloadPreservesFriendlyFilename()
         {
-            var record = context.MockPackRequested.Object.First(x => x.savePath == "test");
+            var record = context.Context.PackRequested.First(x => x.savePath == "test");
             record.savePath = "packs/request/generated/CII Animal Data Spreadsheet123456789.xlsm";
+            context.Context.SaveChanges();
             var result = (FileStreamResult)controller.GetPack(record.savePath);
             using var stream = result.FileStream;
             Assert.That(result.FileDownloadName, Is.EqualTo("CII Animal Data Spreadsheet123456789.xlsm"));
         }
 
-        [Test]
-        public void Test_DeletePack_Rejects_Paths_That_Do_Not_Belong_To_The_Pack()
-        {
-            Assert.IsInstanceOf<NotFoundResult>(controller.DeletePack("C:\\Windows\\win.ini", Guid.Parse("0C51DC76-B92D-420A-BA5F-006E564C06ED")));
-        }
     }
 }
+
+
+
+

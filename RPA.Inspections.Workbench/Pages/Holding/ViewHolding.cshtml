@@ -1,0 +1,327 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Holding.ViewHoldingModel
+@{
+    ViewData["Title"] = "ViewHolding";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Page("/Index")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Page("/Holding/Index")'">Back</button>
+</div>
+@if (string.IsNullOrEmpty(Model.Holding.primaryName))
+{
+    <h3>@Html.DisplayFor(model => model.Holding.cphNumber)</h3>
+}
+else
+{
+    <h3>@Html.DisplayFor(model => model.Holding.primaryName) (@Html.DisplayFor(model => model.Holding.cphNumber))</h3>
+}
+<hr />
+
+                
+@await Component.InvokeAsync("ViewLinkedHoldings", new { holdingId = Model.Holding.holdingId })
+
+    
+
+    <table>
+        <tr><td><br /></td></tr>
+        
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Holding.holdingId)
+        <tr 
+            style="font-size:18px">
+
+            <td>
+                @Html.LabelFor(model => model.Holding.SBI) :
+            </td>
+
+            <td>
+                @if (Model.Holding.SBI != 0 && Model.Holding.SBI != null)
+                {
+                    @Html.DisplayFor(model => model.Holding.SBI)
+                }
+                else
+                {
+                    @:Not Available
+                }
+
+            </td>
+            
+
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.inspectionDeadlineDate) :
+            </td>
+            <td>
+
+                @Html.DisplayFor(model => model.Holding.inspectionDeadlineDate)
+            </td>
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td>
+                @Html.LabelFor(model => model.Holding.addressLine1) :
+            </td>
+
+            <td>
+                @Html.DisplayFor(model => model.Holding.addressLine1)
+
+            </td>
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.animalsToBeInspected) :
+            </td>
+            <td>
+                @await Component.InvokeAsync("CountCattle", new { holdingId = Model.Holding.holdingId })
+            </td>
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td></td>
+
+            <td>
+                @Html.DisplayFor(model => model.Holding.addressLine2)
+            </td>
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.selectionMethod) :
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Holding.selectionMethod)
+            </td>
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td></td>
+
+            <td>
+                @Html.DisplayFor(model => model.Holding.addressLine3)
+            </td>
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.SchemeName) :
+            </td>
+            <td>
+                @Html.HiddenFor(model => model.Holding.SchemeName)
+                @Html.HiddenFor(model => model.Holding.schemeYearOnly)
+            </td>
+
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td></td>
+
+            <td>
+                @Html.DisplayFor(model => model.Holding.region)
+            </td>
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.lastDataRefresh) :
+            </td>
+            <td>
+                @if (Model.Holding.lastDataRefresh != null)
+                {
+                @Html.DisplayFor(model => model.Holding.lastDataRefresh)
+                }
+                else
+                {
+                   @:N/A 
+                }
+            </td>
+   
+
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td></td>
+
+            <td>
+                @Html.DisplayFor(model => model.Holding.postCode)
+            </td>
+            <td style="padding-left:100px">
+                @Html.LabelFor(model => model.Holding.TotalMovesThisYear) :
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.Holding.TotalMovesThisYear)
+            </td>
+
+
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td>@Html.LabelFor(model => model.Holding.telephoneNumber) :</td>
+
+            <td>
+                @if (String.IsNullOrEmpty(Model.Holding.telephoneNumber))
+                {
+                   @:Not Provided
+                }
+                else
+                {
+                   @Html.DisplayFor(model => model.Holding.telephoneNumber)
+                }
+            </td>
+
+
+
+        </tr>
+
+        <tr style="font-size:18px">
+
+            <td>@Html.LabelFor(model => model.Holding.mobileNumber) :</td>
+
+            <td>
+                @if (String.IsNullOrEmpty(Model.Holding.mobileNumber))
+                {
+                    @:Not Provided
+                }
+                else
+                {
+                    @Html.DisplayFor(model => model.Holding.mobileNumber)
+                }
+            </td>
+            @await Component.InvokeAsync("ViewPackRequested", new { holdingId = Model.Holding.holdingId })
+        </tr>
+
+        @Html.HiddenFor(model => model.Holding.primaryName)
+        @Html.HiddenFor(model => model.Holding.addressLine1)
+        @Html.HiddenFor(model => model.Holding.addressLine2)
+        @Html.HiddenFor(model => model.Holding.addressLine3)
+        @Html.HiddenFor(model => model.Holding.SBI)
+        @Html.HiddenFor(model => model.Holding.region)
+        @Html.HiddenFor(model => model.Holding.postCode)
+        @Html.HiddenFor(model => model.Holding.telephoneNumber)
+        @Html.HiddenFor(model => model.Holding.mobileNumber)
+        @Html.HiddenFor(model => model.Holding.faxNumber)
+       
+        </table>
+
+<div class="hidden" id="userMail"><p>@Model.UserMail</p></div>
+<br />
+<div class="float-right"><button class="PackReq" data-id="@Model.Holding.holdingId" data-selector="@Model.Holding.cphNumber"  style="position:static">Request Animal Data Pack</button></div>
+
+@*<div><button onclick="location.href='@Url.Action("TestMethods", "Holding", new { HoldingId = @Model.Holding.holdingId })'">TEST</button></div>*@
+
+<br />
+<hr />
+<br />
+
+
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#animals" data-toggle="tab" aria-expanded="false">Animal Data</a></li>
+    <li><a href="#late" data-toggle="tab" aria-expanded="false">Historical Data</a></li>
+</ul>
+<div id="tab-content" class="tab-content">
+    <div class="partial-view-container fade active in tab-pane" id="animals">
+        <h5 style="text-align:center; padding-top:1em">Cattle List</h5>
+        
+        @await Component.InvokeAsync("ViewCattle", new { holdingId = Model.Holding.holdingId })
+    </div>
+    <div class="partial-view-container tab-pane fade" id="late">
+        <h5 style="text-align:center; padding-top:1em">Late List</h5>
+        @await Component.InvokeAsync("LateCattle", new { holdingId = Model.Holding.holdingId })
+    </div>
+</div>
+
+
+    <div id="dialog" style="display:none;">
+
+        <div><h3>Enter Your Email Address: </h3></div>
+        <div><input type="text" id="newEmail" value="" /></div>
+        <br />
+        <div><button class="MailUpdate" data-id="@Model.Holding.holdingId" style="position:center; margin-left:85px">Update Email</button></div>
+
+    </div>
+
+
+    <script type="text/javascript">
+
+    $("#dialog").dialog({
+        autoOpen: false,
+        width: "auto",
+        height: "auto",
+        title: "Enter Email",
+        modal: true,
+        closeText: null,
+        draggable: true,
+
+        beforeClose: function (event, ui) {
+
+        },
+    });
+
+
+    $(".PackReq").click(function (e) {
+
+        e.preventDefault();
+
+
+
+        var pr = $('#pRequested').val();
+
+        if (pr == "True")
+        {
+            alert("Pack has already been requested.")
+        }
+        else {
+
+            var id = $(this).data("id");
+
+            var cph = $(this).data("selector");
+
+            var uMail = $("#userMail p").text();
+
+            if (uMail == "") {
+
+                $("#dialog").dialog("open");
+
+            }
+
+            else {
+
+                $.ajax({
+                    url: '@Url.Action("PackRequest", "Holding")',
+                    type: 'POST',
+                    cache: false,
+                    data: { HoldingId: id, CPH: cph },
+                    success: function (result) {
+
+                        window.location.href = window.location.pathname + "?" + $.param({ 'HoldingId': id });
+
+
+                    }
+                })
+            }
+        }
+    });
+
+
+
+
+
+
+    $(".MailUpdate").click(function () {
+
+        var id = $(this).data("id");
+        var newMail = $("#newEmail").val();
+
+        $.ajax({
+            url: '@Url.Action("PeopleUpdate", "Holding")',
+            type: 'POST',
+            cache: false,
+            data: { UserEmail: newMail, HoldingId: id },
+            success: function (result) {
+                alert("Your Email has been updated, please re-request pack");
+                window.location.href = window.location.pathname + "?" + $.param({ 'HoldingId': id });
+            }
+        })
+
+
+        $("#dialog").dialog("close");
+    });
+
+
+    </script>
+

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
@@ -56,9 +57,10 @@ public static class ApplicationServices
 
         services.AddRazorPages(options =>
         {
-            options.Conventions.AddPageRoute("/Index", "");
+            options.Conventions.AuthorizePage("/Index", BasicAccessPolicy);
+            options.Conventions.AuthorizeFolder("/Admin", AdminPolicy);
+            options.Conventions.AuthorizeFolder("/BcmsAdmin", BcmsPolicy);
             options.Conventions.AddPageRoute("/Index", "Home");
-            options.Conventions.AddPageRoute("/Error", "Error/Index/{id?}");
         });
 
         services.AddControllersWithViews();
@@ -219,9 +221,9 @@ public static class ApplicationServices
 
     private static void AddDatabase(IServiceCollection services, string workbenchConnection, string peopleConnection)
     {
-        services.AddScoped<WorkbenchContext>(_ => new WorkbenchContext(workbenchConnection));
+        services.AddDbContext<WorkbenchContext>(o => o.UseSqlServer(workbenchConnection, sql => sql.EnableRetryOnFailure()));
         services.AddScoped<IWorkbenchContext>(provider => provider.GetRequiredService<WorkbenchContext>());
-        services.AddScoped<PeopleContext>(_ => new PeopleContext(peopleConnection));
+        services.AddDbContext<PeopleContext>(o => o.UseSqlServer(peopleConnection, sql => sql.EnableRetryOnFailure()));
         services.AddScoped<IPeopleContext>(provider => provider.GetRequiredService<PeopleContext>());
         services.AddHealthChecks().AddCheck<SqlReadinessHealthCheck>("sql", tags: ["ready"]);
     }

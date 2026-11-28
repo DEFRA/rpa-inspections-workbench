@@ -1,10 +1,6 @@
 # Assessment - RPA.Inspections.Workbench
 
-> **Superseded data-access assessment (2026-11-09):** Workbench now uses
-> `EntityFramework` **6.4.4**, not EF Core 10.0.14. Both contexts use scoped EF6
-> SQL Server connections with database initializers disabled. The former EF Core
-> baseline artifacts/tooling were removed; do not execute the historical EF Core
-> rollout commands or treat the old verification results below as current.
+> **Data-access update:** Workbench now uses EF Core 10.0.x (`Microsoft.EntityFrameworkCore.SqlServer`) with fluent mappings that preserve the legacy EF6 schema, and the MVC views are Razor Pages. No EF Core migrations are adopted (schema is deployment-managed). Verification: 273 tests passed, 3 skipped. See the README; migration/baseline details below predate this change and are superseded.
 > Entra authentication and Key Vault integration remain in place. Generated packs
 > and recorded BCMS report downloads now use private Blob Storage; imports use memory,
 > and only the active read-only Excel template is packaged. Existing files/database
@@ -266,3 +262,5 @@ dotnet ef migrations script 0 ExistingSchemaBaseline --idempotent --project .\RP
 | Read-only local SQL connectivity probe | Exit 1; SQL Server not found/inaccessible, login timeout |
 
 Full-suite TRX files are `TestResults\efcore-final.trx` and `TestResults\efcore-release.trx`; pre-migration evidence is `TestResults\ef6-baseline.trx`. The NuGet critical warning is not suppressed. A transient test compilation failure from ambiguous SQLite/SQL Server metadata extension methods was corrected by explicitly selecting the SQL Server extension, and the complete suite subsequently passed. No live SQL result is represented by either the offline provider tests or the skipped acceptance tests.
+
+

@@ -1,5 +1,5 @@
-﻿using RPA.Inspections.Workbench.Models;
-using System.Data.Entity;
+using RPA.Inspections.Workbench.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.Inspections.Workbench.DAL
 {

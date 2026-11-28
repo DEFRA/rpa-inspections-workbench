@@ -1,0 +1,30 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.InspectorListModel
+@{
+    ViewData["Title"] = "InspectorList";
+}
+
+<h2>Inspector List</h2>
+
+<p>
+    <a asp-page="AddInspector">Add Inspector</a>
+</p>
+<table class="table">
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.Inspectors[0].staffNumber)</th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.Inspectors) {
+    <tr style="text-align:center">
+        <td>@item.staffNumber</td>
+        <td>
+            <form method="post" asp-page-handler="Remove">
+                <input type="hidden" name="inspectorId" value="@item.inspectorId" />
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+}
+
+</table>

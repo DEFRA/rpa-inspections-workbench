@@ -1,0 +1,58 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Holding.PacksRequestedModel
+@{
+    ViewData["Title"] = "PacksRequested";
+}
+
+
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Index")'">Home</button>
+</div>
+<br />
+
+
+<h3>Outstanding Packs Requested</h3>
+
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Packs[0].Holding.cphNumber)
+        </th>
+
+        <th>
+            @Html.DisplayNameFor(model => model.Packs[0].Holding.primaryName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Packs[0].Holding.region)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Packs[0].datePackRequested)
+        </th>
+    </tr>
+
+    @foreach (var item in Model.Packs)
+    {
+        <tr id=@item.holdingId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.Holding.cphNumber)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.Holding.primaryName)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.Holding.region)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.datePackRequested)
+            </td>
+            
+        </tr>
+    }
+</table>
+
+<div>
+    @await Component.InvokeAsync("GeneratedPacks")
+</div>

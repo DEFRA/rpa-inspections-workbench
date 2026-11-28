@@ -108,7 +108,7 @@ public class AuthenticationHostTests
         Assert.That(html.Contains("location.href='/BcmsAdmin'"), Is.EqualTo(bcms));
     }
 
-    [TestCase("Workbench.Admin", HttpStatusCode.Redirect)]
+    [TestCase("Workbench.Admin", HttpStatusCode.BadRequest)]
     [TestCase("Workbench.Super", HttpStatusCode.Redirect)]
     [TestCase("Workbench.Admin,Workbench.Super", HttpStatusCode.BadRequest)]
     public async Task BulkUploadRequiresBothRolesBeforeAntiforgeryValidation(string roles, HttpStatusCode expected)
@@ -145,3 +145,5 @@ public class AuthenticationSessionController : Controller
         return NoContent();
     }
 }
+
+

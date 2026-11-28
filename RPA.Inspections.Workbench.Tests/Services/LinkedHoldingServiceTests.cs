@@ -1,4 +1,4 @@
-﻿
+
 using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
@@ -7,7 +7,7 @@ using RPA.Inspections.Workbench.SL;
 using RPA.Inspections.Workbench.Tests.DAL.Mock;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +28,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         public void Setup()
         {
             context = new MockWorkbenchContext();
-            linkedHoldingService = new LinkedHoldingService(context.MockContext.Object);
+            linkedHoldingService = new LinkedHoldingService(context.Context);
             
         }
 
@@ -81,3 +81,4 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
     }
 }
+

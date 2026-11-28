@@ -1,0 +1,157 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.ViewHoldingModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "ViewHolding";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Page("/Index")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/HoldingList")'">Back</button>
+</div>
+
+<h2>Edit Holding</h2>
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<form method="post">
+    <input type="hidden" asp-for="Holding.holdingId" />
+    <table>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.cphNumber) </td>
+            <td>@Html.TextBoxFor(model => model.Holding.cphNumber)
+                @Html.ValidationMessageFor(model => model.Holding.cphNumber)
+        </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.primaryName) </td>
+            <td>
+                @Html.DisplayFor(model => model.Holding.primaryName)
+            @Html.ValidationMessageFor(model => model.Holding.primaryName)
+        </td>
+    </tr>
+    <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.SBI) </td>
+            <td>@Html.TextBoxFor(model => model.Holding.SBI) 
+            @Html.ValidationMessageFor(model => model.Holding.SBI)</td>
+        </tr>
+        <tr><td><br /></td></tr>
+
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.SchemeNameDrop.Text) </td>
+            <td>
+                <select asp-for="Holding.SchemeNameDropId" asp-items="Model.SchemeNames" style="width:220px;"><option value=""></option></select>
+                @Html.ValidationMessageFor(model => model.Holding.SchemeNameDropId)
+            </td>
+        </tr>
+        <tr><td><br /></td></tr>
+
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.selectionMethod) </td>
+            <td>
+                @Html.DropDownListFor(model => model.Holding.selectionMethod, new List<SelectListItem> { new SelectListItem { Text = "", Value = "null" }, new SelectListItem { Text = "Risk", Value = "Risk" }, new SelectListItem { Text = "Random", Value = "Random" }, new SelectListItem { Text = "Targeted", Value = "Targeted" }, new SelectListItem { Text = "Audit", Value = "Audit" }, new SelectListItem { Text = "Other", Value = "Other" } }, new { @style = "width:220px;" })
+                @Html.ValidationMessageFor(model => model.Holding.selectionMethod)
+            </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.inspectionDeadlineDate) </td>
+            <td>
+                @Html.TextBoxFor(model => model.Holding.inspectionDeadlineDate, "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "date-picker form-control", @style = "width:220px; font-size:19px;" })
+            @Html.ValidationMessageFor(model => model.Holding.inspectionDeadlineDate, "", new { @class = "text-danger" })
+        </td>
+    </tr>
+    <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.animalsToBeInspected) </td>
+            <td>@Html.TextBoxFor(model => model.Holding.animalsToBeInspected) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.Active) </td>
+            <td>@Html.CheckBoxFor(model => model.Holding.Active) </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.AssignedUser) </td>
+            <td>
+                <input type="hidden" id="id" name="id" value="" />
+                @Html.TextBoxFor(model => model.Holding.AssignedUser, new { @id = "Psearch", @name = "Psearch" })
+            @Html.ValidationMessageFor(model => model.Holding.AssignedUser, "", new { @class = "text-danger" })
+
+            </td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td>@Html.LabelFor(model => model.Holding.AssignedDate) </td>
+            <td>@Html.DisplayFor(model => model.Holding.AssignedDate) </td>
+          
+            @Html.HiddenFor(model => model.Holding.primaryName)
+            @Html.HiddenFor(model => model.Holding.addressLine1)
+            @Html.HiddenFor(model => model.Holding.addressLine2)
+            @Html.HiddenFor(model => model.Holding.addressLine3)
+            @Html.HiddenFor(model => model.Holding.SBI)
+            @Html.HiddenFor(model => model.Holding.region)
+            @Html.HiddenFor(model => model.Holding.postCode)
+            @Html.HiddenFor(model => model.Holding.telephoneNumber)
+            @Html.HiddenFor(model => model.Holding.mobileNumber)
+            @Html.HiddenFor(model => model.Holding.faxNumber)
+
+        </tr>
+        <tr><td><br /></td></tr>
+    </table>
+
+    <button style="position:static;">Save</button></form>
+<script>
+        // search function and autocomplete for people section
+
+            $(document).ready(function () {
+                $('#Psearch').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            dataType: 'json',
+                            type: 'Get',
+                            url: '@Url.Action("PeopleSearch", "Admin")',
+                            data: { searchstring: request.term },
+
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item
+
+                                    })
+                                );
+                            }
+                        })
+                    },
+
+
+
+
+
+                    select: function (event, ui) {
+                        $('#Psearch').val(ui.item.value);
+                        $('#id').val(ui.item.value);
+
+                        return false;
+
+                    },
+                    minLength: 1
+                })
+    });
+
+
+    $(function () {
+        $(".date-picker").datepicker({
+            dateFormat: 'yy-MM-dd',
+            todayBtn: true,
+            autoclose: true
+        });
+    })
+
+
+    
+</script>
+

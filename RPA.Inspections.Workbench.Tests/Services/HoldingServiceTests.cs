@@ -8,7 +8,7 @@ using RPA.Inspections.Workbench.Tests.DAL.Mock;
 using RPA.Inspections.Workbench.Tests.Factory;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,9 +32,9 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
-            filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
-            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
-            holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
+            filterService = new FilterService(context.Context, peopleContext.Context);
+            userHelper = new UserHelper(peopleContext.Context, MockHttpContext.GetMockedHttpContextAccessor());
+            holdingService = new HoldingService(context.Context, peopleContext.Context, filterService, userHelper);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
             var result = holdingService.GetAllArchivedHoldings("", archivedYears, "");
 
             //Assert
-            Assert.AreEqual("Big Farm3", result[0].primaryName);
+            Assert.AreEqual("Archived Farm", result[0].primaryName);
 
         }
 
@@ -165,3 +165,5 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
     }
 }
+
+

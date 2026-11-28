@@ -1,0 +1,71 @@
+@page
+@model RPA.Inspections.Workbench.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h2>Main Menu</h2>
+
+@*<h2 style="color:red">TEST MODE ONLY! DO NOT REQUEST PACKS UNLESS YOU HAVE BEEN AUTHORISED TO DO SO</h2>*@
+
+
+
+<div class="container half float-left">
+    <br />
+
+    <div class="float-left clear-both">
+
+        <button class="button" onclick="location.href='@Url.Page("/Holding/Index")'">Find/View Holdings</button>
+
+
+        <p>Search for a Holding</p>
+
+    </div>
+
+    <div class="float-left clear-both">
+
+        <button class="button" onclick="location.href='@Url.Page("/Holding/PacksRequested")'">Pack Requests</button>
+
+        <p>View Your Animal Data Pack Requests</p>
+    </div>
+
+    @if ((await Authorization.AuthorizeAsync(User, RPA.Inspections.Workbench.Services.ApplicationServices.AdminPolicy)).Succeeded)
+    {
+        <div class="float-left clear-both">
+
+            <button class="button" onclick="location.href='@Url.Page("/Admin/Index")'">Admin Area</button>
+
+            <p>Admin Area which includes Breed Edit and Inspection List Upload</p>
+        </div>
+    }
+
+    @if ((await Authorization.AuthorizeAsync(User, RPA.Inspections.Workbench.Services.ApplicationServices.BcmsPolicy)).Succeeded)
+    {
+        <div class="float-left clear-both">
+
+            <button class="button" onclick="location.href='@Url.Page("/BcmsAdmin/Index")'">BCMS Admin Area</button>
+
+            <p>BCMS Admin Area which includes managing the Severity Calculator generation</p>
+
+        </div>
+    }
+    @*<div><button onclick="location.href='@Url.Action("TestMethods", "Holding")'">TEST</button></div>*@
+
+</div>
+
+<div class="container half float-left clear-none no-mobile">
+    <div class="float-left clear-both">
+        <img class="border-none" src="~/Images/cattlelogo.jpg" />
+    </div>
+    <div class="float-left clear-both img-detail">
+        <p>
+
+            CI Inspections Workbench is an application which allows inspectors to view various holdings and their cattle then subsequently request Excel Inspection Packs.
+
+        </p>
+    </div>
+</div>
+
+<div class="info-label">
+    DEFRA DDTS Development Team
+</div>

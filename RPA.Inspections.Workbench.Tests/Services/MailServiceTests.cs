@@ -33,7 +33,7 @@ namespace RPA.Inspections.Workbench.Tests.Services
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
             sendService = new Mock<ISendService>();
-            mailService = new MailService(context.MockContext.Object);
+            mailService = new MailService(context.Context);
         }
 
         [Test]
@@ -42,8 +42,8 @@ namespace RPA.Inspections.Workbench.Tests.Services
         {
             //Arrange
 
-            Holding holding = context.MockHolding.Object.Where(x => x.holdingId == Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")).First();
-            PackRequested packRequested = context.MockPackRequested.Object.Where(x => x.packRequestedId == Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31")).First();
+            Holding holding = context.Context.Holding.Where(x => x.holdingId == Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")).First();
+            PackRequested packRequested = context.Context.PackRequested.Where(x => x.packRequestedId == Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31")).First();
 
             //Act
 
@@ -81,3 +81,4 @@ namespace RPA.Inspections.Workbench.Tests.Services
 
     }
 }
+

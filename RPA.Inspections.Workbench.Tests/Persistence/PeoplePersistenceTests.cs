@@ -1,34 +1,28 @@
 using Microsoft.AspNetCore.Http;
-using System.Data.Common;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.Helpers;
 using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Tests.Authentication;
+using RPA.Inspections.Workbench.Tests.DAL.Mock;
 
 namespace RPA.Inspections.Workbench.Tests.Persistence;
 
 [TestFixture]
 public class PeoplePersistenceTests
 {
-    private DbConnection connection;
+    private MockPeopleContext db;
     private PeopleContext context;
 
     [SetUp]
     public void SetUp()
     {
-        connection = Effort.DbConnectionFactory.CreateTransient();
-        context = new PeopleContext(connection, contextOwnsConnection: false);
-        // Only the isolated in-memory test store is created; the external OLA database is never migrated.
-        context.Database.Create();
+        db = new MockPeopleContext(seed: false);
+        context = db.Context;
     }
 
     [TearDown]
-    public void TearDown()
-    {
-        context?.Dispose();
-        connection?.Dispose();
-    }
+    public void TearDown() => db.Dispose();
 
     [Test]
     public void StaffNumberAuditLookupAndSharedEmailAssignmentsUsePersistedPeople()
@@ -38,7 +32,7 @@ public class PeoplePersistenceTests
             new Person { Id = Guid.NewGuid(), Name = "Inspector", StaffNumber = "M600300", Email = "inspector@example.test", Location = location },
             new Person { Id = Guid.NewGuid(), Name = "Second account", StaffNumber = "M600301", Email = "inspector@example.test", Location = location } });
         context.SaveChanges();
-        context.DetachAll();
+        context.ChangeTracker.Clear();
         var helper = new UserHelper(context, new HttpContextAccessor
         {
             HttpContext = new DefaultHttpContext { User = AuthenticationTests.Principal() }
@@ -50,7 +44,7 @@ public class PeoplePersistenceTests
     }
 
     [Test]
-    public void CompositeManagerKeysAndPeopleLocationLazyLoadingRoundTrip()
+    public void CompositeManagerKeysAndExplicitlyIncludedNavigationsRoundTrip()
     {
         var person = new Person
         {
@@ -61,14 +55,16 @@ public class PeoplePersistenceTests
             new Manager { Person = person, managerId = Guid.NewGuid() },
             new Manager { Person = person, managerId = Guid.NewGuid() } });
         context.SaveChanges();
-        context.DetachAll();
-        var loaded = context.People.Single();
-        Assert.That(context.Entry(loaded).Reference(x => x.Location).IsLoaded, Is.False);
+        context.ChangeTracker.Clear();
+
+        // Lazy loading is gone: navigations load only when included.
+        var bare = context.People.Single();
+        Assert.That(bare.Location, Is.Null);
+        context.ChangeTracker.Clear();
+        var loaded = context.People.Include(x => x.Location).Include(x => x.Managers).AsSplitQuery().Single();
         Assert.That(loaded.Location.name, Is.EqualTo("Office"));
         Assert.That(loaded.Managers.Count, Is.EqualTo(2));
         Assert.That(loaded.Managers.All(x => x.personId == person.Id), Is.True);
         Assert.That(context.Managers.Select(x => x.managerId).Distinct().Count(), Is.EqualTo(2));
-        Assert.That(typeof(PeopleContext).Assembly.GetTypes().Any(x =>
-            !x.IsAbstract && typeof(System.Data.Entity.Migrations.DbMigration).IsAssignableFrom(x)), Is.False);
     }
 }

@@ -1,4 +1,4 @@
-﻿@model List<RPA.Inspections.Workbench.Models.PackRequested>
+@model List<RPA.Inspections.Workbench.Models.PackRequested>
 
 
 @{
@@ -53,11 +53,17 @@
                 <div><button onclick="location.href='@Url.Action("GetPack", "Holding", new { savePath = item.savePath })'">Download Pack</button></div>
             </td>
             <td align="center">
-                <div><button onclick="location.href='@Url.Action("DeletePack", "Holding", new { savePath = item.savePath, packID = item.packRequestedId })'">Delete Pack</button></div>
+                <form method="post" action="@Url.Page("/Holding/PacksRequested", "DeletePack")">
+                    <input type="hidden" name="savePath" value="@item.savePath" />
+                    <input type="hidden" name="packID" value="@item.packRequestedId" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit">Delete Pack</button>
+                </form>
             </td>
             @Html.HiddenFor(modelItem => item.packRequestedId)
         </tr>
     }
 </table>
+
 
 

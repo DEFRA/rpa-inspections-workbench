@@ -37,7 +37,7 @@ public static class KeyVaultConfiguration
                     ManagedIdentityClientId = string.IsNullOrWhiteSpace(clientId) ? null : clientId
                 })
                 : string.IsNullOrWhiteSpace(clientId)
-                    ? new ManagedIdentityCredential()
+                    ? new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned)
                     : new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(clientId));
             client = new SecretClient(vault, credential);
         }

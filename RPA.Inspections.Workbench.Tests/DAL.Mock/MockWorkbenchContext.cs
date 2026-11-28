@@ -1,123 +1,92 @@
-﻿using Moq;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using RPA.Inspections.Workbench.DAL;
-using RPA.Inspections.Workbench.Models;
 using RPA.Inspections.Workbench.Tests.Data.Mock;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPA.Inspections.Workbench.Tests.DAL.Mock
 {
-    public class MockWorkbenchContext
+    // Real WorkbenchContext over an in-memory SQLite database seeded with the shared test data.
+    // The connection stays open for the lifetime of the instance because the database vanishes when it closes.
+    public class MockWorkbenchContext : IDisposable
     {
+        private readonly SqliteConnection connection;
 
-        public Mock<IWorkbenchContext> MockContext { get; set; }
+        public WorkbenchContext Context { get; }
 
-        //Workbench Items
-
-        public virtual Mock<DbSet<Breed>> MockBreed { get; set; }
-
-        public virtual Mock<DbSet<Cattle>> MockCattle { get; set; }
-
-        public virtual Mock<DbSet<Control>> MockControl { get; set; }
-
-        public virtual Mock<DbSet<Holding>> MockHolding { get; set; }
-
-        public virtual Mock<DbSet<Inspector>> MockInspector { get; set; }
-
-        public virtual Mock<DbSet<LinkedHolding>> MockLinkedHolding { get; set; }
-
-        public virtual Mock<DbSet<PackRequested>> MockPackRequested { get; set; }
-
-        public virtual Mock<DbSet<SchemeNameDrop>> MockSchemeNameDrop { get; set; }
-
-        public virtual Mock<DbSet<BcmsRequested>> MockBcmsRequested { get; set; }
-
-        public MockWorkbenchContext(bool setMocks = true)
+        public MockWorkbenchContext(bool seed = true, bool enforceForeignKeys = false)
         {
-            if (setMocks)
+            // Seed data predates the schema constraints, so keys are only enforced when a test asks for it.
+            connection = new SqliteConnection($"DataSource=:memory:;Foreign Keys={enforceForeignKeys}");
+            connection.Open();
+            Context = NewContext(validate: true);
+            Context.Database.EnsureCreated();
+            if (seed)
             {
-                SetMocks();
+                Seed();
             }
         }
 
-        public void SetMocks()
-        {
-            SetMockContext();
-            SetMockBreed();
-            SetMockCattle();
-            SetMockControl();
-            SetMockHolding();
-            SetMockInspector();
-            SetMockLinkedHolding();
-            SetMockPackRequested();
-            SetMockSchemeNameDrop();
-            SetMockBcmsRequested();
+        public WorkbenchContext NewContext() => NewContext(validate: true);
 
+        private WorkbenchContext NewContext(bool validate) =>
+            new SqliteWorkbenchContext(new DbContextOptionsBuilder<WorkbenchContext>().UseSqlite(connection).Options, validate);
+
+        // SQLite cannot generate the non-key identity column PackRequested.Id, so the tests assign it instead.
+        // The shared test data also predates the Holding validation rules, so seeding skips them.
+        private sealed class SqliteWorkbenchContext(DbContextOptions<WorkbenchContext> options, bool validate) : WorkbenchContext(options)
+        {
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                base.OnModelCreating(modelBuilder);
+                modelBuilder.Entity<RPA.Inspections.Workbench.Models.PackRequested>().Property(x => x.Id).ValueGeneratedNever();
+            }
+
+            protected override void ValidateTrackedEntities()
+            {
+                if (validate)
+                {
+                    base.ValidateTrackedEntities();
+                }
+            }
         }
 
-
-
-        public void SetMockBreed()
+        private void Seed()
         {
-            MockBreed = new Mock<DbSet<Breed>>().SetupData(BreedData.Data());
-            MockContext.Setup(x => x.Breed).Returns(MockBreed.Object);
+            using var seeding = NewContext(validate: false);
+            Seed(seeding);
+        }
+        private static void Seed(WorkbenchContext Context)
+        {
+            Context.SchemeNameDrop.AddRange(SchemeNameDropData.Data());
+            Context.Breed.AddRange(BreedData.Data());
+            Context.Control.AddRange(ControlData.Data());
+            Context.Inspector.AddRange(InspectorData.Data());
+            var holdings = HoldingData.Data();
+            holdings.ForEach(h => h.selectionMethod ??= "RANDOM");
+            Context.Holding.AddRange(holdings);
+            Context.SaveChanges();
+            var breedId = BreedData.Data()[0].breedId;
+            var cattle = CattleData.Data();
+            cattle.ForEach(c => c.breedId = breedId);
+            Context.Cattle.AddRange(cattle);
+            Context.LinkedHolding.AddRange(LinkedHoldingData.Data());
+            Context.PackRequested.AddRange(PackRequestedData.Data());
+            Context.BcmsRequested.AddRange(BcmsRequestedData.Data());
+            Context.SaveChanges();
+            Context.ChangeTracker.Clear();
         }
 
-        public void SetMockCattle()
+        public void Dispose()
         {
-            MockCattle = new Mock<DbSet<Cattle>>().SetupData(CattleData.Data());
-            MockContext.Setup(x => x.Cattle).Returns(MockCattle.Object);
-        }
-
-        public void SetMockControl()
-        {
-            MockControl = new Mock<DbSet<Control>>().SetupData(ControlData.Data());
-            MockContext.Setup(x => x.Control).Returns(MockControl.Object);
-        }
-
-        public void SetMockHolding()
-        {
-            MockHolding = new Mock<DbSet<Holding>>().SetupData(HoldingData.Data());
-            MockContext.Setup(x => x.Holding).Returns(MockHolding.Object);
-        }
-
-        public void SetMockInspector()
-        {
-            MockInspector = new Mock<DbSet<Inspector>>().SetupData(InspectorData.Data());
-            MockContext.Setup(x => x.Inspector).Returns(MockInspector.Object);
-        }
-
-        public void SetMockLinkedHolding()
-        {
-            MockLinkedHolding = new Mock<DbSet<LinkedHolding>>().SetupData(LinkedHoldingData.Data());
-            MockContext.Setup(x => x.LinkedHolding).Returns(MockLinkedHolding.Object);
-        }
-
-        public void SetMockPackRequested()
-        {
-            MockPackRequested = new Mock<DbSet<PackRequested>>().SetupData(PackRequestedData.Data());
-            MockContext.Setup(x => x.PackRequested).Returns(MockPackRequested.Object);
-        }
-
-        public void SetMockSchemeNameDrop()
-        {
-            MockSchemeNameDrop = new Mock<DbSet<SchemeNameDrop>>().SetupData(SchemeNameDropData.Data());
-            MockContext.Setup(x => x.SchemeNameDrop).Returns(MockSchemeNameDrop.Object);
-        }
-
-        public void SetMockBcmsRequested()
-        {
-            MockBcmsRequested = new Mock<DbSet<BcmsRequested>>().SetupData(BcmsRequestedData.Data());
-            MockContext.Setup(x => x.BcmsRequested).Returns(MockBcmsRequested.Object);
-        }
-
-        public void SetMockContext()
-        {
-            MockContext = new Mock<IWorkbenchContext>();
+            Context.Dispose();
+            connection.Dispose();
         }
     }
 }
+
+
+
+
+
+
+

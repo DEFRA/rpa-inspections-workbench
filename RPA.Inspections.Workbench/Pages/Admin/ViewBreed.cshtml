@@ -1,0 +1,39 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.ViewBreedModel
+@{
+    ViewData["Title"] = "ViewBreed";
+}
+
+<div class="float-right">
+    <button style="position:static; " onclick="location.href='@Url.Page("/Index")'">Home</button>
+    &nbsp;
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/BreedList")'">Back</button>
+</div>
+
+<h2>Edit Breed</h2>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form method="post">
+    <input type="hidden" asp-for="Breed.breedId" />
+    <table>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td><label asp-for="Breed.breedCode"></label></td>
+            <td><input asp-for="Breed.breedCode" /></td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td><label asp-for="Breed.breedFull"></label></td>
+            <td><input asp-for="Breed.breedFull" /></td>
+        </tr>
+        <tr><td><br /></td></tr>
+        <tr style="font-size:18px">
+            <td><label asp-for="Breed.Active"></label></td>
+            <td><input asp-for="Breed.Active" /></td>
+        </tr>
+        <tr><td><br /></td></tr>
+    </table>
+
+    <button style="position:static;">Save</button>
+</form>

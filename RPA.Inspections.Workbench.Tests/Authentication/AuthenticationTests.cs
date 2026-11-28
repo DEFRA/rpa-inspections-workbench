@@ -75,13 +75,17 @@ public class AuthenticationTests
     public async Task BulkUploadRetainsAdminAndSuperUserIntersection(string roles, bool allowed)
     {
         using var provider = Provider();
-        var method = typeof(AdminController).GetMethod("Index", new[] { typeof(IFormFile), typeof(bool) });
-        var metadata = typeof(AdminController).GetCustomAttributes(true).OfType<IAuthorizeData>()
-            .Concat(method.GetCustomAttributes(true).OfType<IAuthorizeData>());
-        var policy = await AuthorizationPolicy.CombineAsync(provider.GetRequiredService<IAuthorizationPolicyProvider>(), metadata);
-        var result = await provider.GetRequiredService<IAuthorizationService>()
-            .AuthorizeAsync(Principal(roles.Split(',', StringSplitOptions.RemoveEmptyEntries)), null, policy);
-        Assert.That(result.Succeeded, Is.EqualTo(allowed));
+        var authorization = provider.GetRequiredService<IAuthorizationService>();
+        var principal = Principal(roles.Split(',', StringSplitOptions.RemoveEmptyEntries));
+        // The /Admin folder convention applies the Admin policy; the upload handler then checks SuperUser itself.
+        var adminFolder = (await authorization.AuthorizeAsync(principal, null, ApplicationServices.AdminPolicy)).Succeeded;
+        var page = new Workbench.Pages.Admin.IndexModel(Moq.Mock.Of<Workbench.SL.IFileService>(), authorization);
+        page.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext(new Microsoft.AspNetCore.Mvc.ActionContext(
+            new DefaultHttpContext { User = principal }, new Microsoft.AspNetCore.Routing.RouteData(),
+            new Microsoft.AspNetCore.Mvc.RazorPages.CompiledPageActionDescriptor()));
+        page.TempData = new Microsoft.AspNetCore.Mvc.ViewFeatures.TempDataDictionary(page.HttpContext, Moq.Mock.Of<Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataProvider>());
+        var upload = await page.OnPostAsync(Moq.Mock.Of<IFormFile>(), false);
+        Assert.That(adminFolder && upload is not Microsoft.AspNetCore.Mvc.ForbidResult, Is.EqualTo(allowed));
     }
 
     [Test]
@@ -214,12 +218,14 @@ public class AuthenticationTests
     {
         var people = new MockPeopleContext();
         var accessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext { User = Principal() } };
-        var helper = new UserHelper(people.MockContext.Object, accessor);
+        var helper = new UserHelper(people.Context, accessor);
         Assert.That(helper.CurrentUser(), Is.EqualTo("m600300"));
         Assert.That(helper.CurrentUserEmail(helper.CurrentUser()), Is.EqualTo("Lee.Gordon@Test.com"));
-        Assert.That(helper.CurrentUserName(helper.CurrentUser()), Is.EqualTo(people.MockContext.Object.People.Single(p => p.StaffNumber == "M600300").Name));
+        Assert.That(helper.CurrentUserName(helper.CurrentUser()), Is.EqualTo(people.Context.People.Single(p => p.StaffNumber == "M600300").Name));
         Assert.That(helper.GetAllStaffNumbersForCurrentUser(), Is.EquivalentTo(new[] { "M600300" }));
         accessor.HttpContext = null;
         Assert.That(helper.CurrentUser(), Is.EqualTo("Unknown"));
     }
 }
+
+

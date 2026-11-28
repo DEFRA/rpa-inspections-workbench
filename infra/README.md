@@ -1,4 +1,4 @@
-﻿# Bicep handoff — RPA Inspections Workbench
+# Bicep handoff — RPA Inspections Workbench
 
 This is a repository-only infrastructure handoff, not a deployment or production
 approval. The receiving team supplies approved parameter values and manually
@@ -87,7 +87,7 @@ deployment, what-if, quota, cost or RBAC-propagation check was performed.
 
 ## SQL connectivity (architecture gap resolved this session)
 
-Workbench's EF6 was pinned to `EntityFramework 6.4.4` + `System.Data.SqlClient
+Workbench previously used EF6, pinned to `EntityFramework 6.4.4` + `System.Data.SqlClient
 4.9.0`, whose ADO.NET provider does **not** support `Authentication=Active
 Directory Managed Identity` connection strings. This session upgraded
 Workbench's EF6 to `6.5.2` + `Microsoft.EntityFramework.SqlServer 6.5.2`
@@ -244,3 +244,4 @@ private data-plane access, provider policies or RBAC propagation.
 - **`bank-holidays` service URL** once that sibling app is itself hosted on Azure.
 - **Container registry image publishing / CI/CD** — out of scope for this infra
   generation pass; D-16 says keep whatever CI/CD already exists unchanged.
+

@@ -1,205 +1,77 @@
-using X.PagedList;
+using Microsoft.AspNetCore.Mvc;
 using RPA.Inspections.Workbench.DAL;
 using RPA.Inspections.Workbench.Helpers;
-using RPA.Inspections.Workbench.Models;
-using RPA.Inspections.Workbench.Services;
 using RPA.Inspections.Workbench.SL;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.Inspections.Workbench.Controllers
 {
+    // The Holding screens are Razor Pages (Pages/Holding); this controller keeps the AJAX POST and file download endpoints.
     public class HoldingController : Controller
     {
-        IPeopleContext Pdb;
-        IWorkbenchContext db;
+        private readonly IPeopleContext Pdb;
+        private readonly IWorkbenchContext db;
+        private readonly IPackRequested packRequestedService;
+        private readonly IFileService fileService;
+        private readonly IUserHelper userHelper;
 
-  
-        IHoldingService holdingService;
-        ILinkedHoldingService linkedHoldingService;
-        ICattleService cattleService;
-        IPackRequested packRequestedService;
-        IFileService fileService;
-        IMailService mailService;
-        ISendService sendService;
-        IFilterService filterService;
-        IUserHelper userHelper;
-        IHolidayService holidayService;
-        public HoldingController(IWorkbenchContext db, IPeopleContext Pdb, IHoldingService holdingService, ILinkedHoldingService linkedHoldingService, ICattleService cattleService, IPackRequested packRequestedService, IMailService mailService, IFileService fileService, IFilterService filterService, IUserHelper userHelper, ISendService sendService, IHolidayService holidayService)
+        public HoldingController(IWorkbenchContext db, IPeopleContext Pdb, IPackRequested packRequestedService, IFileService fileService, IUserHelper userHelper)
         {
             this.db = db;
             this.Pdb = Pdb;
-            this.holdingService = holdingService;
-            this.linkedHoldingService = linkedHoldingService;
-            this.cattleService = cattleService;
             this.packRequestedService = packRequestedService;
-            this.mailService = mailService;
-            this.sendService = sendService;
             this.fileService = fileService;
-            this.filterService = filterService;
             this.userHelper = userHelper;
-            this.holidayService = holidayService;
-
         }
-
-
-        // GET: Holding
-        public IActionResult Index(string searchstring = null, int page = 1, int pageSize = 10)
-
-        {
-
-                PagedList<Holding> model;
-
-                if (!string.IsNullOrEmpty(searchstring))
-                {
-                    model = holdingService.GetHolding(searchstring, page, pageSize);
-
-                    if (model.Count == 0)
-                    {
-                        TempData["InvalidCPH"] = "Invalid CPH Entered or CPH not Found";
-                    }
-                }
-                else
-                {
-                    model = holdingService.GetHolding(null, page, pageSize);
-                }
-
-                ViewBag.searchData = searchstring;
-                ViewBag.LoggedInUser = userHelper.CurrentUser();
-                return View(model);
-
-        }
-
-        //GET: All Packs Requested
-        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public IActionResult PacksRequested()
-        {
-
-                var model = packRequestedService.GetOutstandingPackRequests();
-
-                return View(model);
-            
-
-        }
-
-        //GET: Display Holding Overview
-
-        public IActionResult ViewHolding(Guid holdingId)
-        {
-
-                string userid = userHelper.CurrentUser();
-
-                Holding model = holdingService.GetHoldingById(holdingId);
-
-                ViewBag.IDHolding = holdingId;
-
-                ViewBag.userMail = userHelper.CurrentUserEmail(userid);
-
-                return View(model);
-
-        }
-
-        //GET: Test Methods - ****For Testing Purposes Only****
-
-        //public IActionResult TestMethods(Guid? holdingId)
-        //{
-
-        //    if (holdingId == null)
-        //    {
-        //        holdingId = Guid.Parse("FA11ACD9-F89E-4893-8565-DB792CBB2731");
-        //    }
-
-        //    fileService.RunAllBelow(holdingId.Value);
-
-        //    //return Content("");
-
-        //    return RedirectToAction("PacksRequested");
-        //}
 
         //POST - Pack Requested
-        [HttpPost]        
+        [HttpPost]
         public IActionResult PackRequest(Guid holdingId, string cph)
         {
+            packRequestedService.CreatePackRequested(holdingId, cph);
 
-                packRequestedService.CreatePackRequested(holdingId, cph);
+            db.SaveChanges();
 
-                db.SaveChanges();
-
-                return Content("");
+            return Content("");
         }
-
 
         //Update the People database with user's new email
         [HttpPost]
         public IActionResult PeopleUpdate(Guid holdingId, string UserEmail)
         {
+            string userId = userHelper.CurrentUser();
 
-                string userId = userHelper.CurrentUser();
+            var query = from ppl in Pdb.People
+                        where ppl.StaffNumber == userId
+                        select ppl;
 
-                var query = from ppl in Pdb.People
-                            where ppl.StaffNumber == userId
-                            select ppl;
+            foreach (var people in query)
+            {
+                people.Email = UserEmail;
+            }
 
+            db.SaveChanges();
 
-                foreach (Person people in query)
-                {
-                    people.Email = UserEmail;
-                }
-
-
-
-                db.SaveChanges();
-
-                return Content("");
-
+            return Content("");
         }
 
         //Code to Get the Pack
-
         public IActionResult GetPack(string savePath)
         {
+            // Only packs that were generated by the workbench can be downloaded
+            if (!db.PackRequested.Any(x => x.savePath == savePath))
+            {
+                return NotFound();
+            }
 
-                // Only packs that were generated by the workbench can be downloaded
-                if (!db.PackRequested.Any(x => x.savePath == savePath))
-                {
-                    return NotFound();
-                }
-
-                try
-                {
-                    return File(fileService.StreamFile(savePath), System.Net.Mime.MediaTypeNames.Application.Octet,
-                        savePath[(savePath.LastIndexOf('/') + 1)..]);
-                }
-                catch (FileNotFoundException)
-                {
-                    return NotFound();
-                }
-
+            try
+            {
+                return File(fileService.StreamFile(savePath), System.Net.Mime.MediaTypeNames.Application.Octet,
+                    savePath[(savePath.LastIndexOf('/') + 1)..]);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
         }
-
-        //POST: Delete Specific pack
-
-        public IActionResult DeletePack(string savePath, Guid packID)
-        {
-
-                // Only delete the file recorded against this pack request
-                if (!db.PackRequested.Any(x => x.packRequestedId == packID && x.savePath == savePath))
-                {
-                    return NotFound();
-                }
-
-                packRequestedService.DeletePack(savePath, packID);
-
-                return RedirectToAction("PacksRequested");
-
-        }
-
-
     }
-
-
 }

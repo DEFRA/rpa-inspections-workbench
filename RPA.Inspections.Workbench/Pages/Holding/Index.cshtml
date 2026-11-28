@@ -1,0 +1,98 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Holding.IndexModel
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="float-right">
+    <section id="login">
+        Hello, <span class="username">@Model.LoggedInUser</span>
+    </section>
+    </div>
+    <h2>Search Holdings</h2>
+    <h5>Enter CPH Number</h5>
+    <h5 style="color:red">@TempData["InvalidCPH"]</h5>
+
+
+    <form method="get">
+        <div class="float-left">
+            <input type="text" name="searchString" id="searchString" />
+        </div>
+        <div class="float-left" style="margin-left:10px">
+            <button class="button" style="position:static;" id="searchButton">Search</button>
+        </div>
+</form>
+
+    <div class="float-left">
+        <button style="position:static;" onclick="location.href='@Url.Page("/Holding/Index")'">Clear</button>
+    </div>
+
+    <div class="float-right">
+        <button style="position:static;" onclick="location.href='@Url.Page("/Index")'">Home</button>
+    </div>
+    <br />
+
+
+    @if (Model.Holdings.Count == 0)
+    {
+        <br />
+        <h3 style="text-align:center">No Holdings Assigned</h3>
+    }
+
+    @if (Model.Holdings.Count != 0)
+    {
+        <br />
+        <h3 style="text-align:center">Assigned Holdings</h3>
+        <table class="table">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Holdings[0].cphNumber)
+                </th>
+
+                <th>
+                    @Html.DisplayNameFor(model => model.Holdings[0].primaryName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Holdings[0].region)
+                </th>
+                <th>
+                    View Details
+                </th>
+            </tr>
+
+            @foreach (var item in Model.Holdings)
+            {
+                <tr id=@item.holdingId>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.cphNumber)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.primaryName)
+                    </td>
+                    <td align="center">
+                        @Html.DisplayFor(modelItem => item.region)
+                    </td>
+                    <td align="center">
+                        <button onclick="location.href='@Url.Page("/Holding/ViewHolding", new { HoldingId = item.holdingId })'">View Holding</button>
+                    </td>
+
+
+                    
+                </tr>
+            }
+        </table>
+
+
+
+
+        <div class="float-left clear-left">
+            @Html.PagedListPager(Model.Holdings, page => RPA.Inspections.Workbench.Helpers.PageQuery.PagerUrl(Url.Page("/Holding/Index"), Model.SearchString, page, Model.Holdings.PageSize))
+            Showing @(Model.Holdings.TotalItemCount < Model.Holdings.FirstItemOnPage ? 0 : Model.Holdings.FirstItemOnPage) to @Model.Holdings.LastItemOnPage of @Model.Holdings.TotalItemCount Holdings
+        </div>
+
+    }
+    <br />
+    <br />
+

@@ -7,7 +7,7 @@ using RPA.Inspections.Workbench.SL;
 using RPA.Inspections.Workbench.Tests.DAL.Mock;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +28,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         public void Setup()
         {
             context = new MockWorkbenchContext();
-            cattleService = new CattleService(context.MockContext.Object);
+            cattleService = new CattleService(context.Context);
         }
 
         [Test]
@@ -102,3 +102,4 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
     }
 }
+

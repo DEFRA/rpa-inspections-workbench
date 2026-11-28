@@ -1,61 +1,37 @@
-﻿using Moq;
-using RPA.Inspections.Workbench.DAL;
-using RPA.Inspections.Workbench.Models;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using RPA.Inspections.Workbench.Tests.Data.Mock;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPA.Inspections.Workbench.Tests.DAL.Mock
 {
-    public class MockPeopleContext
+    // Real PeopleContext over in-memory SQLite. Production never writes to the People database; the tests seed it directly.
+    public class MockPeopleContext : IDisposable
     {
-        public Mock<IPeopleContext> MockContext { get; set; }
+        private readonly SqliteConnection connection = new("DataSource=:memory:;Foreign Keys=False");
 
-        public virtual Mock<DbSet<Location>> MockLocations { get; set; }
-        public virtual Mock<DbSet<Manager>> MockManagers { get; set; }
-        public virtual Mock<DbSet<Person>> MockPeople { get; set; }
+        public PeopleContext Context { get; }
 
-        public MockPeopleContext(bool setMocks = true)
+        public MockPeopleContext(bool seed = true)
         {
-            if (setMocks)
+            connection.Open();
+            Context = new PeopleContext(new DbContextOptionsBuilder<PeopleContext>().UseSqlite(connection).Options);
+            Context.Database.EnsureCreated();
+            if (seed)
             {
-                SetMocks();
+                Context.Locations.AddRange(LocationData.Data());
+                Context.People.AddRange(PeopleData.Data());
+                Context.SaveChanges();
+                Context.Managers.AddRange(ManagerData.Data());
+                Context.SaveChanges();
+                Context.ChangeTracker.Clear();
             }
         }
 
-        public void SetMocks()
+        public void Dispose()
         {
-            SetMockContext();
-            SetMockLocation();
-            SetMockManager();
-            SetMockPeople();
-        }
-
-        public void SetMockLocation()
-        {
-            MockLocations = new Mock<DbSet<Location>>().SetupData(LocationData.Data());
-            MockContext.Setup(x => x.Locations).Returns(MockLocations.Object);
-        }
-
-        public void SetMockManager()
-        {
-            MockManagers = new Mock<DbSet<Manager>>().SetupData(ManagerData.Data());
-            MockContext.Setup(x => x.Managers).Returns(MockManagers.Object);
-        }
-
-        public void SetMockPeople()
-        {
-            MockPeople = new Mock<DbSet<Person>>().SetupData(PeopleData.Data());
-            MockContext.Setup(x => x.People).Returns(MockPeople.Object);
-        }
-
-        public void SetMockContext()
-        {
-            MockContext = new Mock<IPeopleContext>();
+            Context.Dispose();
+            connection.Dispose();
         }
     }
 }
+

@@ -1,3 +1,4 @@
+using RPA.Inspections.Workbench.Tests.Data.Mock;
 using Moq;
 using NUnit.Framework;
 using RPA.Inspections.Workbench.DAL;
@@ -11,7 +12,7 @@ using RPA.Inspections.Workbench.Tests.Factory;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -46,15 +47,15 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             context = new MockWorkbenchContext();
             peopleContext = new MockPeopleContext();
-            cattleService = new CattleService(context.MockContext.Object);
+            cattleService = new CattleService(context.Context);
             sendService = new Mock<ISendService>();
             holidayService = new Mock<IHolidayService>();
             mailService = new Mock<IMailService>();
-            filterService = new FilterService(context.MockContext.Object, peopleContext.MockContext.Object);
-            userHelper = new UserHelper(peopleContext.MockContext.Object, MockHttpContext.GetMockedHttpContextAccessor());
-            holdingService = new HoldingService(context.MockContext.Object, peopleContext.MockContext.Object, filterService, userHelper);
+            filterService = new FilterService(context.Context, peopleContext.Context);
+            userHelper = new UserHelper(peopleContext.Context, MockHttpContext.GetMockedHttpContextAccessor());
+            holdingService = new HoldingService(context.Context, peopleContext.Context, filterService, userHelper);
             fileStorage = new Mock<IFileStorage>();
-            fileService = new FileService(context.MockContext.Object, cattleService, holdingService, sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
+            fileService = new FileService(context.Context, cattleService, holdingService, sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
         }
 
         [Test]
@@ -88,8 +89,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             //Assert
 
-            Assert.AreEqual(7, context.MockContext.Object.Holding.Count());
-            context.MockContext.Verify(x => x.SaveChanges(), Times.AtLeastOnce());
+            Assert.AreEqual(7, context.Context.Holding.Count());
+            Assert.AreEqual(7, context.NewContext().Holding.Count());
         }
 
         [Test]
@@ -109,7 +110,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             newrow[0] = "01/011/0111";
             newrow[1] = "123456789";
-            newrow[2] = "";
+            newrow[2] = "20";
             newrow[3] = "EGG";
             newrow[4] = "";
             newrow[5] = "M600300";
@@ -123,8 +124,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             //Assert
 
-            Assert.AreEqual(7, context.MockContext.Object.Holding.Count());
-            context.MockContext.Verify(x => x.SaveChanges(), Times.AtLeastOnce());
+            Assert.AreEqual(7, context.Context.Holding.Count());
+            Assert.AreEqual(7, context.NewContext().Holding.Count());
         }
 
         [Test]
@@ -134,8 +135,8 @@ namespace RPA.Inspections.Workbench.Tests.SL
             //Arrange
 
 
-            Holding holding = context.MockContext.Object.Holding.Where(x => x.holdingId == Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")).First();
-            PackRequested packRequested = context.MockContext.Object.PackRequested.Where(x => x.packRequestedId == Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31")).First();
+            Holding holding = context.Context.Holding.Where(x => x.holdingId == Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF70")).First();
+            PackRequested packRequested = context.Context.PackRequested.Where(x => x.packRequestedId == Guid.Parse("A4609495-1FA5-4BEB-9B09-00777D219F31")).First();
 
 
             //Act
@@ -144,7 +145,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             //Assert
 
-            context.MockContext.Verify(x => x.SaveChanges(), Times.AtLeastOnce());
+            Assert.AreEqual("TestPath", context.NewContext().PackRequested.Single(x => x.packRequestedId == packRequested.packRequestedId).savePath);
         }
 
 
@@ -162,10 +163,10 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
             //Assert
 
-            Assert.AreEqual(0, context.MockContext.Object.PackRequested.Count());
-            Assert.AreEqual(0, context.MockContext.Object.Cattle.Count());
-            Assert.AreEqual(0, context.MockContext.Object.LinkedHolding.Count());
-            Assert.AreEqual(2, context.MockContext.Object.Holding.Count());
+            Assert.AreEqual(0, context.Context.PackRequested.Count());
+            Assert.AreEqual(0, context.Context.Cattle.Count());
+            Assert.AreEqual(0, context.Context.LinkedHolding.Count());
+            Assert.AreEqual(2, context.Context.Holding.Count());
         }
 
 
@@ -236,7 +237,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
             var before = Directory.GetFiles(fileService.PathBuilder("")).OrderBy(path => path).ToArray();
             var template = fileService.PathBuilder("CII Animal Data Spreadsheet v2.2.xlsm");
             var templateHash = SHA256.HashData(File.ReadAllBytes(template));
-            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding", selectionMethod = "RANDOM", schemeYear = "2026" };
             var request = new PackRequested(holding.holdingId);
             var uploadedNames = new List<string>();
             fileStorage.Setup(value => value.Upload(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>()))
@@ -263,13 +264,14 @@ namespace RPA.Inspections.Workbench.Tests.SL
         [Test]
         public void FailedPackUploadDoesNotMarkRequestGeneratedOrSendNotification()
         {
-            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding", selectionMethod = "RANDOM", schemeYear = "2026" };
             var request = new PackRequested(holding.holdingId);
-            context.MockHolding.Object.Add(holding);
-            context.MockPackRequested.Object.Add(request);
+            context.Context.Holding.Add(holding);
+            context.Context.PackRequested.Add(request);
+            context.Context.SaveChanges();
             var holdingLookup = new Mock<IHoldingService>();
             holdingLookup.Setup(value => value.GetHoldingById(holding.holdingId)).Returns(holding);
-            var generator = new FileService(context.MockContext.Object, cattleService, holdingLookup.Object,
+            var generator = new FileService(context.Context, cattleService, holdingLookup.Object,
                 sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
             fileStorage.Setup(value => value.Upload(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>()))
                 .Throws(new InvalidOperationException("Offline storage failure."));
@@ -278,20 +280,21 @@ namespace RPA.Inspections.Workbench.Tests.SL
             Assert.That(request.activeRequest, Is.True);
             Assert.That(request.packGenerated, Is.Null);
             Assert.That(request.savePath, Is.Null);
-            context.MockContext.Verify(value => value.SaveChanges(), Times.Never);
+            Assert.That(context.NewContext().PackRequested.Count(), Is.EqualTo(PackRequestedData.Data().Count + 1));
             sendService.VerifyNoOtherCalls();
         }
 
         [Test]
         public void CompletedPackIsRecordedOnlyAfterUpload()
         {
-            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding" };
+            var holding = new Holding { cphNumber = "12/345/6789", SchemeName = "CII26", primaryName = "Blob test holding", selectionMethod = "RANDOM", schemeYear = "2026" };
             var request = new PackRequested(holding.holdingId);
-            context.MockHolding.Object.Add(holding);
-            context.MockPackRequested.Object.Add(request);
+            context.Context.Holding.Add(holding);
+            context.Context.PackRequested.Add(request);
+            context.Context.SaveChanges();
             var holdingLookup = new Mock<IHoldingService>();
             holdingLookup.Setup(value => value.GetHoldingById(holding.holdingId)).Returns(holding);
-            var generator = new FileService(context.MockContext.Object, cattleService, holdingLookup.Object,
+            var generator = new FileService(context.Context, cattleService, holdingLookup.Object,
                 sendService.Object, mailService.Object, holidayService.Object, fileStorage.Object);
             var events = new List<string>();
             string uploadedName = null;
@@ -301,7 +304,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
                     uploadedName = name;
                     events.Add("uploaded");
                 });
-            context.MockContext.Setup(value => value.SaveChanges()).Callback(() => events.Add("saved")).Returns(1);
+            context.Context.SavingChanges += (_, _) => events.Add("saved");
 
             generator.RunAllBelow(holding.holdingId);
 
@@ -318,7 +321,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             //Arrange
 
-            List<Cattle> cattleList = context.MockCattle.Object.ToList();
+            List<Cattle> cattleList = context.Context.Cattle.ToList();
 
             //Act
 
@@ -336,7 +339,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             //Arrange
 
-            List<Cattle> cattleList = context.MockCattle.Object.ToList();
+            List<Cattle> cattleList = context.Context.Cattle.ToList();
 
             //Act
 
@@ -354,7 +357,7 @@ namespace RPA.Inspections.Workbench.Tests.SL
         {
             //Arrange
 
-            List<Cattle> cattleList = context.MockCattle.Object.ToList();
+            List<Cattle> cattleList = context.Context.Cattle.ToList();
 
             //Act
 
@@ -370,3 +373,9 @@ namespace RPA.Inspections.Workbench.Tests.SL
 
     }
 }
+
+
+
+
+
+

@@ -7,7 +7,7 @@ using RPA.Inspections.Workbench.Services;
 using RPA.Inspections.Workbench.Tests.DAL.Mock;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,41 +29,7 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
            
             fileStorage = new Mock<IFileStorage>();
             fileStorage.Setup(x => x.Download(It.IsAny<string>())).Returns(() => new MemoryStream(new byte[] { 1, 2, 3 }));
-            controller = new BcmsAdminController(context.MockContext.Object, fileStorage.Object);
-        }
-
-        [Test]
-        public void Index()
-        {
-            // Arrange
-
-            // Act
-            ViewResult result = controller.Index() as ViewResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-        }
-
-        [Test]
-        public void Test_BulkRequest()
-        {
-            DateTime startDate = new DateTime(2019,01,01);
-            DateTime endDate = new DateTime(2019,01,02);
-
-            var result = controller.BulkRequest(startDate, endDate) as ViewResult;
-
-            context.MockContext.Verify(x => x.SaveChanges(), Times.Once);
-        }
-
-        [Test]
-        public void Test_SpecificRequest()
-        {
-            string cph = "01/234/5678";
-            int schemeYear = 2018;
-
-            var result = controller.SpecificRequest(cph, schemeYear) as ViewResult;
-
-            context.MockContext.Verify(x => x.SaveChanges(), Times.Once);
+            controller = new BcmsAdminController(context.Context, fileStorage.Object);
         }
 
         [Test]
@@ -94,3 +60,4 @@ namespace RPA.Inspections.Workbench.Tests.Controllers
         }
     }
 }
+

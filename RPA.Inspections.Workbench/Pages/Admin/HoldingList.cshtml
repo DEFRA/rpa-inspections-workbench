@@ -1,0 +1,90 @@
+@page
+@model RPA.Inspections.Workbench.Pages.Admin.HoldingListModel
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@{
+    ViewData["Title"] = "HoldingList";
+}
+
+<h2>Holding List</h2>
+<div>
+    <p style="font:italic">Please enter a CPH, Holding Name or Inspector ID</p>
+</div>
+
+<form method="get">
+    <div class="float-left">
+        <input type="text" name="searchString" id="searchString" />
+    </div>
+    <div class="float-left" style="margin-left:10px">
+        <button class="button" style="position:static;" id="searchButton">Search</button>
+    </div>
+</form>
+
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/HoldingList")'">Clear</button>
+</div>
+
+<div class="float-left">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/AddHolding")'">Add Holding</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Admin/Index")'">Back</button>
+</div>
+
+<div class="float-right">
+    <button style="position:static;" onclick="location.href='@Url.Page("/Index")'">Home</button>
+</div>
+<br />
+
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Holdings[0].cphNumber)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Holdings[0].primaryName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Holdings[0].Active)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Holdings[0].AssignedUser)
+        </th>
+        <th>
+            Edit
+        </th>
+    </tr>
+
+    @foreach (var item in Model.Holdings)
+    {
+        <tr id=@item.holdingId>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.cphNumber)
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.primaryName)
+            </td>
+            <td align="center">
+                <input type="checkbox" checked="@item.Active" disabled="disabled" />
+            </td>
+            <td align="center">
+                @Html.DisplayFor(modelItem => item.AssignedUser)
+            </td>
+            <td align="center"><button style="margin-left:10px" onclick="location.href='@Url.Page("/Admin/ViewHolding", new { HoldingId = item.holdingId })'">Edit</button></td>
+            
+        </tr>
+    }
+
+</table>
+
+
+
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model.Holdings, page => RPA.Inspections.Workbench.Helpers.PageQuery.PagerUrl(Url.Page("/Admin/HoldingList"), Model.SearchString, page, Model.Holdings.PageSize))
+    Showing @(Model.Holdings.TotalItemCount < Model.Holdings.FirstItemOnPage ? 0 : Model.Holdings.FirstItemOnPage) to @Model.Holdings.LastItemOnPage of @Model.Holdings.TotalItemCount Holdings
+</div>
